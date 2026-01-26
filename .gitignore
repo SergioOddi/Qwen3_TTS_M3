@@ -74,3 +74,6 @@ Icon
 # Temporary files
 *.tmp
 *.temp
+
+# Installer files (troppo pesanti)
+Miniconda3-latest-MacOSX-arm64.sh
