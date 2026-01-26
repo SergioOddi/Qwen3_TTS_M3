@@ -1,0 +1,76 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Conda
+.conda/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Modelli scaricati (opzionale - commentare se vuoi trackare i modelli)
+models/*
+!models/.gitkeep
+
+# File di output generati
+OUTPUT/*.wav
+OUTPUT/*.mp3
+!OUTPUT/.gitkeep
+
+# File di input (opzionale - dipende dal workflow)
+INPUT/*.txt
+INPUT/*.md
+!INPUT/.gitkeep
+!INPUT/biochemistry_sample.txt
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Thumbnails
+*.thumb
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+*.temp

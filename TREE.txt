@@ -1,0 +1,185 @@
+TTS_M3 - Struttura Progetto Completa
+═══════════════════════════════════════════════════════════════
+
+TTS_M3/
+│
+├── 📄 DOCUMENTAZIONE
+│   ├── README.md                    (Guida principale completa)
+│   ├── QUICKSTART.md               (Guida rapida 3 passi)
+│   ├── CLAUDE.md                   (Documentazione tecnica)
+│   ├── EXAMPLES.md                 (Esempi pratici)
+│   ├── CHANGELOG.md                (Storia modifiche)
+│   ├── PROJECT_SUMMARY.md          (Riepilogo implementazione)
+│   └── TREE.txt                    (Questo file)
+│
+├── 🔧 SETUP E TESTING
+│   ├── setup.sh                    (Setup automatico - 163 linee)
+│   ├── test_installation.py        (Test installazione - 253 linee)
+│   └── requirements.txt            (Dipendenze Python)
+│
+├── 💻 CODICE SORGENTE
+│   └── src/
+│       ├── generate_audio.py       (Generazione singola - 183 linee)
+│       └── batch_process.py        (Elaborazione batch - 207 linee)
+│
+├── ⚙️ CONFIGURAZIONI
+│   └── config/
+│       ├── README.md              (Guida voice design)
+│       ├── voice_config.json      (Voce maschile IT - default)
+│       ├── voice_config_female.json    (Voce femminile IT)
+│       └── voice_config_english.json   (Voce maschile EN)
+│
+├── 📂 DIRECTORY DATI
+│   ├── INPUT/                     (File .txt da convertire)
+│   │   ├── esempio.txt           (File demo pre-caricato)
+│   │   └── .gitkeep
+│   │
+│   ├── OUTPUT/                    (File audio generati)
+│   │   └── .gitkeep
+│   │
+│   └── models/                    (Cache modelli - auto-download)
+│       └── .gitkeep
+│
+└── 🔨 GIT CONFIGURATION
+    ├── .gitignore                 (Esclusioni repository)
+    └── .gitattributes             (Gestione LF/binary)
+
+═══════════════════════════════════════════════════════════════
+STATISTICHE PROGETTO
+═══════════════════════════════════════════════════════════════
+
+📊 Codice
+  - Python (src/):              390 linee
+  - Python (test):              253 linee
+  - Shell (setup.sh):           163 linee
+  - TOTALE:                     806 linee
+
+📚 Documentazione
+  - File Markdown:              7 file
+  - README principale:          ~450 linee
+  - Guide tecniche:             ~300 linee
+  - Esempi pratici:             ~400 linee
+
+⚙️ Configurazioni
+  - Voci pre-configurate:       3 file JSON
+  - Guide configurazione:       1 README
+
+🎯 Funzionalità
+  - Script principali:          2 (generate + batch)
+  - Script utility:             2 (setup + test)
+  - File esempio:               1
+
+═══════════════════════════════════════════════════════════════
+FUNZIONALITÀ IMPLEMENTATE
+═══════════════════════════════════════════════════════════════
+
+✅ Core Features
+  ✓ Generazione audio da testo con Qwen3-TTS
+  ✓ Voice design tramite descrizioni testuali
+  ✓ Supporto 10 lingue (IT, EN, CN, JP, KR, DE, FR, RU, PT, ES)
+  ✓ Elaborazione batch multipli file
+  ✓ Output in formato WAV e MP3
+
+✅ Ottimizzazioni M3 Max
+  ✓ Metal Performance Shaders (MPS)
+  ✓ Flash Attention 2 (opzionale)
+  ✓ dtype bfloat16
+  ✓ Riutilizzo modello in batch
+  ✓ 36GB RAM unificata
+
+✅ User Experience
+  ✓ Setup automatico interattivo
+  ✓ Test installazione completo
+  ✓ Progress bar elaborazione
+  ✓ Messaggi informativi chiari
+  ✓ Gestione errori robusta
+  ✓ Help integrato
+
+✅ Configurabilità
+  ✓ 3 voci pre-configurate
+  ✓ Sistema JSON per voci custom
+  ✓ Parametri: lingua, voce, formato
+  ✓ Guide voice design
+
+✅ Documentazione
+  ✓ README completo
+  ✓ Quick start guide
+  ✓ Documentazione tecnica
+  ✓ Esempi pratici
+  ✓ Changelog
+
+═══════════════════════════════════════════════════════════════
+QUICK START
+═══════════════════════════════════════════════════════════════
+
+1. Setup ambiente:
+   ./setup.sh
+
+2. Attiva ambiente:
+   conda activate qwen3-tts
+
+3. Verifica installazione:
+   python test_installation.py
+
+4. Primo audio:
+   python src/generate_audio.py -i INPUT/esempio.txt
+
+5. Batch processing:
+   python src/batch_process.py
+
+═══════════════════════════════════════════════════════════════
+COMANDI PRINCIPALI
+═══════════════════════════════════════════════════════════════
+
+# Generazione singola
+python src/generate_audio.py -i INPUT/file.txt
+
+# Con voce specifica
+python src/generate_audio.py -i INPUT/file.txt -c config/voice_config_female.json
+
+# Batch processing
+python src/batch_process.py
+
+# Batch con configurazione
+python src/batch_process.py -c config/voice_config_english.json
+
+# Forza rigenerazione
+python src/batch_process.py --force
+
+# Test installazione
+python test_installation.py
+
+# Demo web
+qwen-tts-demo Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign --port 8000
+
+═══════════════════════════════════════════════════════════════
+FILE CHIAVE DA LEGGERE
+═══════════════════════════════════════════════════════════════
+
+1. README.md              → Per panoramica completa
+2. QUICKSTART.md          → Per iniziare velocemente
+3. EXAMPLES.md            → Per esempi pratici
+4. config/README.md       → Per personalizzare voci
+5. CLAUDE.md              → Per dettagli tecnici
+6. PROJECT_SUMMARY.md     → Per overview implementazione
+
+═══════════════════════════════════════════════════════════════
+PRESTAZIONI ATTESE (M3 Max 36GB)
+═══════════════════════════════════════════════════════════════
+
+⏱️ Tempi
+  - Primo caricamento:         10-20 secondi
+  - Generazione frase breve:   1-2 secondi
+  - Batch 10 file:             15-30 secondi
+
+💾 Risorse
+  - RAM modello caricato:      4-6 GB
+  - Download iniziale modelli: 3-5 GB
+  - Cache totale modelli:      ~10 GB
+  - GPU utilizzo (MPS):        70-80%
+
+═══════════════════════════════════════════════════════════════
+
+Progetto completato il: 2026-01-26
+Versione: 1.0.0
+Status: ✅ Production Ready

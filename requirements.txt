@@ -1,0 +1,16 @@
+# Core TTS dependencies
+qwen-tts>=0.0.5
+
+# Audio processing
+soundfile>=0.12.1
+pydub>=0.25.1
+
+# Model downloading (optional)
+modelscope>=1.11.0
+
+# Flash Attention 2 (optional - install separately with MAX_JOBS=4)
+# flash-attn>=2.0.0
+
+# Utilities
+torch>=2.0.0
+tqdm>=4.65.0
