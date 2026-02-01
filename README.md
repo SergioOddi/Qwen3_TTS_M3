@@ -311,4 +311,4 @@ Per domande o problemi:
 
 ---
 
-**Sviluppato per MacBook Pro M3 Max | Powered by Qwen3-TTS**
+**Sviluppato dal Prof. Sergio Oddi per MacBook Pro M3 Max | Powered by Qwen3-TTS**
