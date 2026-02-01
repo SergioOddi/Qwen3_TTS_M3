@@ -180,11 +180,12 @@ audio.export("output.mp3", format="mp3", bitrate="192k")
 
 ## Voice Cloning
 
-### Modello: Qwen3-TTS-12Hz-1.7B-VoiceClone
+### Modello: Qwen3-TTS-12Hz-1.7B-Base
 - **Capacità**: Clonazione vocale da campioni audio (3-10 secondi)
 - **Lingue supportate**: Stesso set del VoiceDesign (10 lingue)
 - **Cross-lingual**: Sì (voce EN → testo IT mantiene timbro)
 - **Streaming**: Sì
+- **Requisiti**: Richiede audio di riferimento + trascrizione testuale
 
 ### Workflow Voice Cloning
 
@@ -239,11 +240,14 @@ python src/generate_cloned_audio.py -i INPUT/biochemistry.txt -c config/clone_co
   "mode": "voice_clone",
   "language": "Italian",
   "prompt_speech_path": "VOICE_SAMPLES/speaker1.wav",
+  "ref_text": "Trascrizione esatta dell'audio di riferimento",
   "output_format": "wav",
   "sample_rate": 24000,
   "voice_notes": "Voce maschile italiana, tono professionale"
 }
 ```
+
+**IMPORTANTE**: Il campo `ref_text` deve contenere la trascrizione testuale esatta dell'audio di riferimento.
 
 **Esempi config disponibili:**
 - `clone_config_template.json` - Template base
@@ -265,7 +269,7 @@ import soundfile as sf
 from qwen_tts import Qwen3TTSModel
 
 model = Qwen3TTSModel.from_pretrained(
-    "Qwen/Qwen3-TTS-12Hz-1.7B-VoiceClone",
+    "Qwen/Qwen3-TTS-12Hz-1.7B-Base",
     device_map="mps",
     dtype=torch.bfloat16
 )
@@ -273,10 +277,13 @@ model = Qwen3TTSModel.from_pretrained(
 wavs, sr = model.generate_voice_clone(
     text="Testo da far pronunciare",
     language="Italian",
-    prompt_speech="VOICE_SAMPLES/speaker.wav"  # 3-10 sec audio
+    ref_audio="VOICE_SAMPLES/speaker.wav",  # 3-10 sec audio
+    ref_text="Trascrizione dell'audio di riferimento"  # OBBLIGATORIO
 )
 sf.write("output.wav", wavs[0], sr)
 ```
+
+**IMPORTANTE**: Il parametro `ref_text` è obbligatorio e deve contenere la trascrizione esatta dell'audio `ref_audio`.
 
 **Nota**: Vedi `docs/VOICE_CLONING_GUIDE.md` per guida completa.
 

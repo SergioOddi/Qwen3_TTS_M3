@@ -754,7 +754,7 @@ python src/prepare_voice_sample.py \
   -o VOICE_SAMPLES/voice_clean.wav
 ```
 
-### Confronto VoiceDesign vs VoiceClone
+### Confronto VoiceDesign vs Voice Cloning (Base)
 
 ```bash
 # Stesso testo con VoiceDesign
@@ -763,7 +763,7 @@ python src/generate_audio.py \
   -c config/voice_config.json \
   -o OUTPUT/voicedesign_test.wav
 
-# Stesso testo con VoiceClone
+# Stesso testo con Voice Cloning (Base model)
 python src/generate_cloned_audio.py \
   -i INPUT/test.txt \
   -c config/clone_config_speaker1.json \

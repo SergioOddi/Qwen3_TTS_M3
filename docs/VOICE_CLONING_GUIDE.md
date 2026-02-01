@@ -1,6 +1,6 @@
 # Guida Completa Voice Cloning con Qwen3-TTS
 
-Questa guida spiega come clonare voci usando il modello Qwen3-TTS-12Hz-1.7B-VoiceClone.
+Questa guida spiega come clonare voci usando il modello Qwen3-TTS-12Hz-1.7B-Base.
 
 ## Indice
 1. [Quick Start](#quick-start)
@@ -404,17 +404,17 @@ python src/list_voice_samples.py
 
 ### Problema: "Modello scarica lentamente o timeout"
 
-**Causa:** Primo download modello VoiceClone (~3.4GB).
+**Causa:** Primo download modello Base (~3.4GB).
 
 **Soluzione:**
 ```bash
 # Download manuale con modelscope
 pip install -U modelscope
-modelscope download --model Qwen/Qwen3-TTS-12Hz-1.7B-VoiceClone --local_dir ./models/Qwen3-TTS-12Hz-1.7B-VoiceClone
+modelscope download --model Qwen/Qwen3-TTS-12Hz-1.7B-Base --local_dir ./models/Qwen3-TTS-12Hz-1.7B-Base
 
 # Poi usa nel codice:
 model = Qwen3TTSModel.from_pretrained(
-    "./models/Qwen3-TTS-12Hz-1.7B-VoiceClone",  # Path locale
+    "./models/Qwen3-TTS-12Hz-1.7B-Base",  # Path locale
     device_map="mps",
     dtype=torch.bfloat16
 )

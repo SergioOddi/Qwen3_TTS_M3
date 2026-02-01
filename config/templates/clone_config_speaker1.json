@@ -2,6 +2,7 @@
   "mode": "voice_clone",
   "language": "Italian",
   "prompt_speech_path": "VOICE_SAMPLES/speaker1.wav",
+  "ref_text": "TODO: Inserire trascrizione esatta dell'audio speaker1.wav",
   "output_format": "wav",
   "sample_rate": 24000,
   "voice_notes": "Voce maschile italiana, tono professionale e chiaro. Campione di 5 secondi estratto da video."

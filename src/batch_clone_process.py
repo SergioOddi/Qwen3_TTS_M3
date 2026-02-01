@@ -77,10 +77,10 @@ def batch_clone_process(
         print("🔬 Preprocessing biochimica: ATTIVO")
 
     # Carica modello una sola volta
-    print("🔄 Caricamento modello Qwen3-TTS VoiceClone...")
+    print("🔄 Caricamento modello Qwen3-TTS Base (voice cloning)...")
     try:
         model = Qwen3TTSModel.from_pretrained(
-            "Qwen/Qwen3-TTS-12Hz-1.7B-VoiceClone",
+            "Qwen/Qwen3-TTS-12Hz-1.7B-Base",
             device_map="mps",
             dtype=torch.bfloat16,
             attn_implementation="flash_attention_2",
@@ -90,7 +90,7 @@ def batch_clone_process(
         print("⚠ Flash Attention 2 non disponibile, uso implementazione standard")
         try:
             model = Qwen3TTSModel.from_pretrained(
-                "Qwen/Qwen3-TTS-12Hz-1.7B-VoiceClone",
+                "Qwen/Qwen3-TTS-12Hz-1.7B-Base",
                 device_map="mps",
                 dtype=torch.bfloat16,
             )

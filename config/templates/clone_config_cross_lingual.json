@@ -2,6 +2,7 @@
   "mode": "voice_clone",
   "language": "Italian",
   "prompt_speech_path": "VOICE_SAMPLES/english_speaker.wav",
+  "ref_text": "TODO: Insert English transcription of english_speaker.wav",
   "output_format": "wav",
   "sample_rate": 24000,
   "voice_notes": "Cross-lingual cloning: campione vocale inglese usato per sintetizzare testo italiano. Mantiene caratteristiche timbriche della voce originale."

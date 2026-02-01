@@ -2,6 +2,7 @@
   "mode": "voice_clone",
   "language": "Italian",
   "prompt_speech_path": "VOICE_SAMPLES/your_voice_sample.wav",
+  "ref_text": "Inserire qui la trascrizione esatta dell'audio di riferimento (OBBLIGATORIO)",
   "output_format": "wav",
   "sample_rate": 24000,
   "voice_notes": "Descrizione opzionale del campione vocale (es. voce maschile italiana estratta da video intervista)"

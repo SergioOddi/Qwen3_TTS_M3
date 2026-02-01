@@ -89,6 +89,7 @@ def generate_cloned_audio(
     config = load_config(config_path)
     language = config.get('language', 'Italian')
     prompt_speech_path = config.get('prompt_speech_path')
+    ref_text = config.get('ref_text', '')
     output_format = config.get('output_format', 'wav')
     voice_notes = config.get('voice_notes', '')
 
@@ -99,6 +100,13 @@ def generate_cloned_audio(
 
     if not os.path.exists(prompt_speech_path):
         print(f"❌ Errore: Campione audio non trovato: {prompt_speech_path}")
+        return False
+
+    # Verifica presenza trascrizione
+    if not ref_text:
+        print("⚠️  ATTENZIONE: 'ref_text' non specificato nel config.")
+        print("   Il modello Base richiede la trascrizione dell'audio di riferimento.")
+        print("   Aggiungi 'ref_text': 'trascrizione...' nel file config JSON")
         return False
 
     # Leggi testo
@@ -128,16 +136,17 @@ def generate_cloned_audio(
     print(f"📝 Testo da convertire ({len(text)} caratteri)")
     print(f"🗣️  Lingua: {language}")
     print(f"🎤 Campione vocale: {prompt_speech_path}")
+    print(f"📄 Trascrizione: {ref_text[:50]}{'...' if len(ref_text) > 50 else ''}")
     if voice_notes:
         print(f"📌 Note: {voice_notes}")
 
     # Carica modello se non fornito
     model_loaded = False
     if model is None:
-        print("🔄 Caricamento modello Qwen3-TTS VoiceClone...")
+        print("🔄 Caricamento modello Qwen3-TTS Base (voice cloning)...")
         try:
             model = Qwen3TTSModel.from_pretrained(
-                "Qwen/Qwen3-TTS-12Hz-1.7B-VoiceClone",
+                "Qwen/Qwen3-TTS-12Hz-1.7B-Base",
                 device_map="mps",  # Metal Performance Shaders per M3 Max
                 dtype=torch.bfloat16,
                 attn_implementation="flash_attention_2",  # se disponibile
@@ -148,7 +157,7 @@ def generate_cloned_audio(
             print(f"⚠ Flash Attention 2 non disponibile, uso implementazione standard")
             try:
                 model = Qwen3TTSModel.from_pretrained(
-                    "Qwen/Qwen3-TTS-12Hz-1.7B-VoiceClone",
+                    "Qwen/Qwen3-TTS-12Hz-1.7B-Base",
                     device_map="mps",
                     dtype=torch.bfloat16,
                 )
@@ -164,7 +173,8 @@ def generate_cloned_audio(
         wavs, sr = model.generate_voice_clone(
             text=text,
             language=language,
-            prompt_speech=prompt_speech_path,
+            ref_audio=prompt_speech_path,
+            ref_text=ref_text,
         )
 
         # Salva file WAV
@@ -263,6 +273,7 @@ Esempi:
         print('     "mode": "voice_clone",')
         print('     "language": "Italian",')
         print('     "prompt_speech_path": "VOICE_SAMPLES/speaker.wav",')
+        print('     "ref_text": "Trascrizione esatta audio di riferimento",')
         print('     "output_format": "wav"')
         print('   }')
         sys.exit(1)

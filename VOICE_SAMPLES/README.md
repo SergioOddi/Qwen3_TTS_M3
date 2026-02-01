@@ -78,18 +78,24 @@ python src/list_voice_samples.py
 - Registrazioni con eco/riverbero
 - File troppo corti (< 3s)
 
-## Organizzazione Suggerita
+## Convenzioni di Naming
+
+**Formato raccomandato**: `nome_descrittivo_NN.wav`
 
 ```
 VOICE_SAMPLES/
-├── narratore_uomo.wav
-├── narratore_donna.wav
-├── professore_italiano.wav
-├── speaker_english.wav
-└── extracted/
+├── gazzolo_01.wav           # Voce professore - campione 1
+├── narratore_uomo_01.wav    # Voce maschile narrazione
+├── professore_02.wav        # Altro professore - campione 2
+└── extracted/               # Audio estratti da video
     ├── intervista_2024.wav
     └── podcast_episode.wav
 ```
+
+**Note**:
+- Usa nomi descrittivi e chiari
+- Aggiungi `_NN` per campioni multipli dello stesso speaker
+- Per ogni campione crea corrispondente config in `config/clone_nome.json`
 
 ## Note
 
@@ -97,8 +103,15 @@ VOICE_SAMPLES/
 - I campioni vocali non vengono inclusi nel repository
 - Ogni utente deve creare i propri campioni localmente
 
+## Lista Voci Clonate Disponibili
+
+Per vedere tutte le voci disponibili con caratteristiche e istruzioni d'uso:
+
+👉 **[docs/VOCI_DISPONIBILI.md](../docs/VOCI_DISPONIBILI.md)**
+
 ## Risorse
 
+- **Voci disponibili**: `docs/VOCI_DISPONIBILI.md` ⭐
 - **Guida completa**: `docs/VOICE_CLONING_GUIDE.md`
 - **Esempi**: `EXAMPLES.md`
 - **Documentazione**: `CLAUDE.md`

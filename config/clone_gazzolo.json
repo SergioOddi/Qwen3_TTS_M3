@@ -1,0 +1,9 @@
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "prompt_speech_path": "VOICE_SAMPLES/gazzolo_01.wav",
+  "ref_text": "Ora penso di poterglielo dire. Sono qui in incognito per conto dei legali inglesi della signora Doyle e loro sospettano che Andrew Pennington voglia, si...",
+  "output_format": "wav",
+  "sample_rate": 24000,
+  "voice_notes": "Voce Gazzolo - clonata da campione audio originale"
+}
