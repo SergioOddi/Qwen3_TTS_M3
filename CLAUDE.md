@@ -178,30 +178,113 @@ audio.export("output.mp3", format="mp3", bitrate="192k")
 - Prima generazione: ~1-2 secondi (caricamento modello)
 - Generazioni successive: latenza minima in streaming mode
 
-## TODO / Funzionalità Future
+## Voice Cloning
 
-### Voice Cloning (da implementare)
-- [ ] Configurare modello **Qwen3-TTS-12Hz-1.7B-VoiceClone** per clonazione vocale
-- [ ] Creare script per voice cloning da campioni audio (3-10 secondi)
-- [ ] Implementare cross-lingual voice cloning (es. voce inglese che parla italiano)
-- [ ] Creare configurazioni JSON per gestire riferimenti audio per cloning
-- [ ] Testare qualità cloning con diverse sorgenti audio
+### Modello: Qwen3-TTS-12Hz-1.7B-VoiceClone
+- **Capacità**: Clonazione vocale da campioni audio (3-10 secondi)
+- **Lingue supportate**: Stesso set del VoiceDesign (10 lingue)
+- **Cross-lingual**: Sì (voce EN → testo IT mantiene timbro)
+- **Streaming**: Sì
 
-**Note Voice Cloning**:
+### Workflow Voice Cloning
+
+#### 1. Estrazione Audio da Video MP4
+```bash
+# Estrai audio completo
+python src/extract_audio_from_video.py -i video.mp4 -o VOICE_SAMPLES/voice.wav
+
+# Estrai 5 secondi dal secondo 10
+python src/extract_audio_from_video.py -i video.mp4 -o VOICE_SAMPLES/voice.wav --start 10 --duration 5
+
+# Batch: processa tutti i video in una cartella
+python src/extract_audio_from_video.py -i videos/ -o VOICE_SAMPLES/extracted/
+```
+
+#### 2. Preparazione Campione Ottimale (opzionale)
+```bash
+# Normalizza e rimuovi silenzio
+python src/prepare_voice_sample.py -i VOICE_SAMPLES/raw.wav -o VOICE_SAMPLES/speaker.wav
+
+# Suggerisci miglior segmento
+python src/prepare_voice_sample.py -i audio.mp3 --suggest
+```
+
+#### 3. Lista Campioni Disponibili
+```bash
+python src/list_voice_samples.py
+```
+
+#### 4. Generazione Audio con Voice Cloning
+
+**Singolo file:**
+```bash
+python src/generate_cloned_audio.py -i INPUT/testo.txt -c config/clone_config_speaker1.json -o OUTPUT/cloned.wav
+```
+
+**Batch processing:**
+```bash
+python src/batch_clone_process.py -c config/clone_config_speaker1.json
+```
+
+**Con preprocessing biochimica:**
+```bash
+python src/generate_cloned_audio.py -i INPUT/biochemistry.txt -c config/clone_config.json --use-biochem-preprocessor
+```
+
+### Configurazione Voice Cloning
+
+**File JSON** (es. `config/clone_config_speaker1.json`):
+```json
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "prompt_speech_path": "VOICE_SAMPLES/speaker1.wav",
+  "output_format": "wav",
+  "sample_rate": 24000,
+  "voice_notes": "Voce maschile italiana, tono professionale"
+}
+```
+
+**Esempi config disponibili:**
+- `clone_config_template.json` - Template base
+- `clone_config_speaker1.json` - Voce maschile italiana
+- `clone_config_speaker2.json` - Voce femminile italiana
+- `clone_config_cross_lingual.json` - Cross-lingual (voce EN → testo IT)
+
+### Best Practices Voice Cloning
+- **Durata campione**: 3-10 secondi (ottimale 5-7s)
+- **Formato audio**: WAV mono 24kHz
+- **Qualità registrazione**: Audio pulito, senza rumori di fondo
+- **Contenuto**: Voce naturale, non sussurrata o urlata
+- **Cross-lingual**: Funziona ma qualità leggermente inferiore vs. same-language
+
+### Esempio Codice Python
 ```python
-# Esempio uso futuro
-model_clone = Qwen3TTSModel.from_pretrained(
+import torch
+import soundfile as sf
+from qwen_tts import Qwen3TTSModel
+
+model = Qwen3TTSModel.from_pretrained(
     "Qwen/Qwen3-TTS-12Hz-1.7B-VoiceClone",
     device_map="mps",
     dtype=torch.bfloat16
 )
 
-wavs, sr = model_clone.generate_voice_clone(
+wavs, sr = model.generate_voice_clone(
     text="Testo da far pronunciare",
     language="Italian",
-    prompt_speech="path/to/voice_sample.wav"  # 3-10 sec audio pulito
+    prompt_speech="VOICE_SAMPLES/speaker.wav"  # 3-10 sec audio
 )
+sf.write("output.wav", wavs[0], sr)
 ```
+
+**Nota**: Vedi `docs/VOICE_CLONING_GUIDE.md` per guida completa.
+
+## TODO / Funzionalità Future
+
+- [ ] Implementare voice mixing (combinare caratteristiche di più voci)
+- [ ] Aggiungere voice emotion control (controllo emozioni vocali)
+- [ ] Testare voice cloning con diverse lingue source/target
 
 ## Riferimenti
 

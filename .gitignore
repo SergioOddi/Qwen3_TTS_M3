@@ -43,6 +43,15 @@ OUTPUT/*.wav
 OUTPUT/*.mp3
 !OUTPUT/.gitkeep
 
+# Campioni vocali per voice cloning (file audio grandi)
+VOICE_SAMPLES/*.wav
+VOICE_SAMPLES/*.mp3
+VOICE_SAMPLES/*.mp4
+VOICE_SAMPLES/extracted/*.wav
+VOICE_SAMPLES/extracted/*.mp3
+!VOICE_SAMPLES/.gitkeep
+!VOICE_SAMPLES/extracted/.gitkeep
+
 # File di input (opzionale - dipende dal workflow)
 INPUT/*.txt
 INPUT/*.md

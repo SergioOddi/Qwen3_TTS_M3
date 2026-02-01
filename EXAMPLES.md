@@ -508,6 +508,274 @@ chmod +x generate_daily.sh
 ./generate_daily.sh
 ```
 
+## 🎭 Voice Cloning
+
+### Quick Start Voice Cloning
+
+```bash
+# 1. Estrai audio da video
+python src/extract_audio_from_video.py \
+  -i video_intervista.mp4 \
+  -o VOICE_SAMPLES/mia_voce.wav \
+  --start 10 \
+  --duration 5
+
+# 2. Crea configurazione
+cat > config/clone_mia_voce.json << 'EOF'
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "prompt_speech_path": "VOICE_SAMPLES/mia_voce.wav",
+  "output_format": "wav",
+  "sample_rate": 24000
+}
+EOF
+
+# 3. Genera audio clonato
+python src/generate_cloned_audio.py \
+  -i INPUT/testo.txt \
+  -c config/clone_mia_voce.json \
+  -o OUTPUT/audio_clonato.wav
+```
+
+### Workflow Completo da MP4
+
+```bash
+# Step 1: Estrai audio da video MP4
+python src/extract_audio_from_video.py \
+  -i video_lezione.mp4 \
+  -o VOICE_SAMPLES/professore.wav \
+  --start 30 \
+  --duration 6
+
+# Step 2: Verifica qualità campione
+python src/list_voice_samples.py
+
+# Step 3: (Opzionale) Ottimizza campione
+python src/prepare_voice_sample.py \
+  -i VOICE_SAMPLES/professore.wav \
+  -o VOICE_SAMPLES/professore_clean.wav
+
+# Step 4: Crea testo lezione
+cat > INPUT/lezione_biochimica.txt << 'EOF'
+Oggi parleremo del ciclo di Krebs e della fosforilazione ossidativa.
+Il ciclo di Krebs è fondamentale per la produzione di ATP nelle cellule.
+EOF
+
+# Step 5: Genera con voice cloning
+python src/generate_cloned_audio.py \
+  -i INPUT/lezione_biochimica.txt \
+  -c config/clone_professore.json
+```
+
+### Batch Processing con Voice Cloning
+
+```bash
+# Crea multipli file da sintetizzare
+cat > INPUT/slide_01.txt << 'EOF'
+Benvenuti alla prima lezione sul metabolismo cellulare.
+EOF
+
+cat > INPUT/slide_02.txt << 'EOF'
+Il metabolismo si divide in catabolismo e anabolismo.
+EOF
+
+cat > INPUT/slide_03.txt << 'EOF'
+Concludiamo con un riepilogo dei concetti chiave.
+EOF
+
+# Batch cloning di tutti i file
+python src/batch_clone_process.py -c config/clone_professore.json
+
+# Risultati
+ls -lh OUTPUT/*_cloned.wav
+```
+
+### Cross-Lingual Cloning
+
+```bash
+# Usa voce inglese per parlare italiano
+# 1. Estrai voce inglese
+python src/extract_audio_from_video.py \
+  -i english_video.mp4 \
+  -o VOICE_SAMPLES/english_speaker.wav \
+  --duration 5
+
+# 2. Config cross-lingual
+cat > config/clone_cross_lingual.json << 'EOF'
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "prompt_speech_path": "VOICE_SAMPLES/english_speaker.wav",
+  "output_format": "wav",
+  "voice_notes": "Cross-lingual: voce inglese per italiano"
+}
+EOF
+
+# 3. Genera testo italiano con voce inglese
+cat > INPUT/testo_italiano.txt << 'EOF'
+Questo testo in italiano sarà sintetizzato usando la voce inglese.
+Il timbro vocale originale sarà preservato.
+EOF
+
+python src/generate_cloned_audio.py \
+  -i INPUT/testo_italiano.txt \
+  -c config/clone_cross_lingual.json
+```
+
+### Voice Cloning + Preprocessing Biochimica
+
+```bash
+# Genera lezione scientifica con voice cloning
+cat > INPUT/lezione_atp.txt << 'EOF'
+L'ATP, o adenosina trifosfato, è la principale fonte di energia cellulare.
+La sua sintesi avviene attraverso la fosforilazione ossidativa nelle mitocondrie.
+Il processo coinvolge NADH, FADH2 e il complesso della ATP sintasi.
+EOF
+
+# Con preprocessing biochimica
+python src/generate_cloned_audio.py \
+  -i INPUT/lezione_atp.txt \
+  -c config/clone_professore.json \
+  --use-biochem-preprocessor
+
+# Preview preprocessing prima di generare
+python src/generate_cloned_audio.py \
+  -i INPUT/lezione_atp.txt \
+  -c config/clone_professore.json \
+  --preview-preprocessing
+```
+
+### Gestione Voci Multiple
+
+```bash
+# Scenario: Podcast con 2 speaker
+# Speaker 1 (host)
+python src/extract_audio_from_video.py \
+  -i host_video.mp4 \
+  -o VOICE_SAMPLES/host.wav \
+  --start 5 --duration 5
+
+# Speaker 2 (guest)
+python src/extract_audio_from_video.py \
+  -i guest_video.mp4 \
+  -o VOICE_SAMPLES/guest.wav \
+  --start 10 --duration 6
+
+# Crea config per entrambi
+cat > config/clone_host.json << 'EOF'
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "prompt_speech_path": "VOICE_SAMPLES/host.wav",
+  "output_format": "wav"
+}
+EOF
+
+cat > config/clone_guest.json << 'EOF'
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "prompt_speech_path": "VOICE_SAMPLES/guest.wav",
+  "output_format": "wav"
+}
+EOF
+
+# Genera dialogo
+cat > INPUT/host_intro.txt << 'EOF'
+Benvenuti al nostro podcast! Oggi abbiamo un ospite speciale.
+EOF
+
+cat > INPUT/guest_risposta.txt << 'EOF'
+Grazie per l'invito! Sono felice di essere qui oggi.
+EOF
+
+python src/generate_cloned_audio.py -i INPUT/host_intro.txt -c config/clone_host.json -o OUTPUT/01_host_intro.wav
+python src/generate_cloned_audio.py -i INPUT/guest_risposta.txt -c config/clone_guest.json -o OUTPUT/02_guest_risposta.wav
+```
+
+### Utility Script
+
+```bash
+# Lista tutti i campioni disponibili
+python src/list_voice_samples.py
+
+# Lista con dettagli
+python src/list_voice_samples.py --details
+
+# Prepara campione ottimale
+python src/prepare_voice_sample.py \
+  -i raw_audio.mp3 \
+  -o VOICE_SAMPLES/optimized.wav
+
+# Suggerisci miglior segmento
+python src/prepare_voice_sample.py \
+  -i long_audio.wav \
+  --suggest
+```
+
+### Estrazione Batch da Video
+
+```bash
+# Estrai audio da tutti i video in una cartella
+mkdir -p videos/
+# (copia video MP4 in videos/)
+
+python src/extract_audio_from_video.py \
+  -i videos/ \
+  -o VOICE_SAMPLES/extracted/
+
+# Verifica risultati
+python src/list_voice_samples.py
+```
+
+### Tips Voice Cloning
+
+```bash
+# 1. Trova segmento migliore nel video
+# Apri video in player (QuickTime, VLC)
+# Identifica segmento con voce chiara (5-7s)
+# Annota timestamp (es. 01:23 = 83 secondi)
+
+# 2. Estrai segmento ottimale
+python src/extract_audio_from_video.py \
+  -i video.mp4 \
+  -o VOICE_SAMPLES/voice.wav \
+  --start 83 \
+  --duration 6
+
+# 3. Verifica qualità
+python src/list_voice_samples.py
+# Cerca: ✓ = Ottimale, ⚠ = Accettabile, ✗ = Sconsigliato
+
+# 4. Se necessario, ottimizza
+python src/prepare_voice_sample.py \
+  -i VOICE_SAMPLES/voice.wav \
+  -o VOICE_SAMPLES/voice_clean.wav
+```
+
+### Confronto VoiceDesign vs VoiceClone
+
+```bash
+# Stesso testo con VoiceDesign
+python src/generate_audio.py \
+  -i INPUT/test.txt \
+  -c config/voice_config.json \
+  -o OUTPUT/voicedesign_test.wav
+
+# Stesso testo con VoiceClone
+python src/generate_cloned_audio.py \
+  -i INPUT/test.txt \
+  -c config/clone_config_speaker1.json \
+  -o OUTPUT/voiceclone_test.wav
+
+# Confronta risultati
+open OUTPUT/voicedesign_test.wav
+open OUTPUT/voiceclone_test.wav
+```
+
 ---
 
-**Hai bisogno di altri esempi?** Consulta [README.md](README.md) per documentazione completa!
+**Voice Cloning avanzato?** Consulta [docs/VOICE_CLONING_GUIDE.md](docs/VOICE_CLONING_GUIDE.md)
+
+**Altri esempi?** Vedi [README.md](README.md) per documentazione completa!
