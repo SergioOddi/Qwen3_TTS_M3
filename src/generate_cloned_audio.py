@@ -210,16 +210,16 @@ def main():
         epilog="""
 Esempi:
   # Voice cloning base con config predefinita
-  python generate_cloned_audio.py -i INPUT/testo.txt -c config/clone_config_speaker1.json
+  python generate_cloned_audio.py -i INPUT/testo.txt -c config/gazzolo.json
 
   # Specifica output esplicito
-  python generate_cloned_audio.py -i INPUT/testo.txt -c config/clone_config_speaker1.json -o OUTPUT/cloned.wav
+  python generate_cloned_audio.py -i INPUT/testo.txt -c config/gazzolo_docente.json -o OUTPUT/audio.wav
 
   # Con preprocessing biochimica
-  python generate_cloned_audio.py -i INPUT/biochemistry.txt -c config/clone_config.json --use-biochem-preprocessor
+  python generate_cloned_audio.py -i INPUT/biochemistry.txt -c config/gazzolo_docente.json --use-biochem-preprocessor
 
   # Preview preprocessing senza generare audio
-  python generate_cloned_audio.py -i INPUT/biochemistry.txt -c config/clone_config.json --preview-preprocessing
+  python generate_cloned_audio.py -i INPUT/biochemistry.txt -c config/gazzolo_docente.json --preview-preprocessing
         """
     )
 
@@ -231,13 +231,13 @@ Esempi:
 
     parser.add_argument(
         '--output', '-o',
-        help='Path al file audio output (default: OUTPUT/[nome_input]_cloned.wav)'
+        help='Path al file audio output (default: OUTPUT/[nome_input]_by_[voice_name].wav)'
     )
 
     parser.add_argument(
         '--config', '-c',
         required=True,
-        help='Path al file di configurazione voice cloning (es. config/clone_config_speaker1.json)'
+        help='Path al file di configurazione voice cloning (es. config/gazzolo.json o config/capone_docente.json)'
     )
 
     parser.add_argument(
@@ -254,10 +254,15 @@ Esempi:
 
     args = parser.parse_args()
 
+    # Carica configurazione per ottenere voice_name
+    config = load_config(args.config)
+    voice_name = config.get('voice_name', 'cloned')
+    output_format = config.get('output_format', 'wav')
+
     # Determina path output se non specificato
     if args.output is None:
         input_name = Path(args.input).stem
-        args.output = f"OUTPUT/{input_name}_cloned.wav"
+        args.output = f"OUTPUT/{input_name}_by_{voice_name}.{output_format}"
 
     # Verifica file input esista
     if not os.path.exists(args.input):

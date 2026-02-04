@@ -1,0 +1,11 @@
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "voice_name": "gazzolo_docente",
+  "prompt_speech_path": "CLONAGGIO/INPUT_VOCE_da_CLONARE/gazzolo_01_vocals.wav",
+  "ref_text": "Ora penso di poterglielo dire. Sono qui in incognito per conto dei legali inglesi della signora Doyle e loro sospettano che Andrew Pennington voglia, si...",
+  "instruct": "Voce maschile con tono calmo e profondo, cadenza rilassata e riflessiva, stile professore di biochimica che spiega concetti complessi con chiarezza e pazienza",
+  "output_format": "wav",
+  "sample_rate": 24000,
+  "voice_notes": "Voce Gazzolo clonata + stile docente biochimica"
+}

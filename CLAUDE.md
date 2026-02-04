@@ -219,41 +219,44 @@ python src/list_voice_samples.py
 
 **Singolo file:**
 ```bash
-python src/generate_cloned_audio.py -i INPUT/testo.txt -c config/clone_config_speaker1.json -o OUTPUT/cloned.wav
+python src/generate_cloned_audio.py -i INPUT/testo.txt -c config/gazzolo.json -o OUTPUT/audio.wav
 ```
 
 **Batch processing:**
 ```bash
-python src/batch_clone_process.py -c config/clone_config_speaker1.json
+python src/batch_clone_process.py -c config/gazzolo_docente.json
 ```
 
 **Con preprocessing biochimica:**
 ```bash
-python src/generate_cloned_audio.py -i INPUT/biochemistry.txt -c config/clone_config.json --use-biochem-preprocessor
+python src/generate_cloned_audio.py -i INPUT/biochemistry.txt -c config/gazzolo_docente.json --use-biochem-preprocessor
 ```
 
 ### Configurazione Voice Cloning
 
-**File JSON** (es. `config/clone_config_speaker1.json`):
+**File JSON** (es. `config/gazzolo.json`):
 ```json
 {
   "mode": "voice_clone",
   "language": "Italian",
-  "prompt_speech_path": "VOICE_SAMPLES/speaker1.wav",
+  "voice_name": "gazzolo",
+  "prompt_speech_path": "VOICE_SAMPLES/gazzolo_01.wav",
   "ref_text": "Trascrizione esatta dell'audio di riferimento",
   "output_format": "wav",
   "sample_rate": 24000,
-  "voice_notes": "Voce maschile italiana, tono professionale"
+  "voice_notes": "Voce Gazzolo - clonata da campione audio originale"
 }
 ```
 
-**IMPORTANTE**: Il campo `ref_text` deve contenere la trascrizione testuale esatta dell'audio di riferimento.
+**IMPORTANTE**:
+- Il campo `ref_text` deve contenere la trascrizione testuale esatta dell'audio di riferimento
+- Il campo `voice_name` determina il suffisso del file output: `nome_file_by_{voice_name}.wav`
 
-**Esempi config disponibili:**
-- `clone_config_template.json` - Template base
-- `clone_config_speaker1.json` - Voce maschile italiana
-- `clone_config_speaker2.json` - Voce femminile italiana
-- `clone_config_cross_lingual.json` - Cross-lingual (voce EN → testo IT)
+**Voci disponibili:**
+- `gazzolo.json` - Voce Gazzolo naturale
+- `gazzolo_docente.json` - Voce Gazzolo con stile docente biochimica
+- `capone.json` - Voce Capone naturale
+- `capone_docente.json` - Voce Capone con stile docente biochimica
 
 ### Best Practices Voice Cloning
 - **Durata campione**: 3-10 secondi (ottimale 5-7s)

@@ -62,6 +62,7 @@ def batch_clone_process(
     config = load_config(config_path)
     output_format = config.get('output_format', 'wav')
     prompt_speech_path = config.get('prompt_speech_path')
+    voice_name = config.get('voice_name', 'cloned')
 
     # Verifica campione audio
     if not prompt_speech_path:
@@ -113,7 +114,7 @@ def batch_clone_process(
     print(f"{'='*60}")
 
     for text_file in tqdm(text_files, desc="Elaborazione"):
-        output_file = Path(output_dir) / f"{text_file.stem}_cloned.{output_format}"
+        output_file = Path(output_dir) / f"{text_file.stem}_by_{voice_name}.{output_format}"
 
         # Salta se esiste già
         if skip_existing and output_file.exists():
@@ -171,16 +172,16 @@ def main():
         epilog="""
 Esempi:
   # Batch processing base
-  python batch_clone_process.py -c config/clone_config_speaker1.json
+  python batch_clone_process.py -c config/gazzolo.json
 
   # Specifica directory input/output custom
-  python batch_clone_process.py -i MY_TEXTS/ -o MY_OUTPUT/ -c config/clone_config_speaker1.json
+  python batch_clone_process.py -i MY_TEXTS/ -o MY_OUTPUT/ -c config/capone_docente.json
 
   # Rigenera anche file esistenti
-  python batch_clone_process.py -c config/clone_config_speaker1.json --force
+  python batch_clone_process.py -c config/gazzolo_docente.json --force
 
   # Con preprocessing biochimica
-  python batch_clone_process.py -c config/clone_config_speaker1.json --use-biochem-preprocessor
+  python batch_clone_process.py -c config/gazzolo_docente.json --use-biochem-preprocessor
         """
     )
 
@@ -199,7 +200,7 @@ Esempi:
     parser.add_argument(
         '--config', '-c',
         required=True,
-        help='Path al file di configurazione voice cloning (es. config/clone_config_speaker1.json)'
+        help='Path al file di configurazione voice cloning (es. config/gazzolo.json o config/capone_docente.json)'
     )
 
     parser.add_argument(
