@@ -1,0 +1,10 @@
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "voice_name": "sermonti",
+  "prompt_speech_path": "VOICE_SAMPLES/sermonti.wav",
+  "ref_text": "Mentre in terra il destino manda avanti le cose così e la culla di Bacco, nato due volte, è fuori pericolo, si racconta che Giove, svanito dal nettare, accantonasse i problemi seri, svagandosi a discutere con una fatua Giunone di futilità!",
+  "output_format": "wav",
+  "sample_rate": 24000,
+  "voice_notes": "Voce Vittorio Sermonti - clonata da campione audio originale"
+}
