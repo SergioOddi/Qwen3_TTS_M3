@@ -22,7 +22,10 @@ TTS_M3/
 ├── INPUT/           # File .txt da convertire in audio
 ├── OUTPUT/          # File audio generati (.wav/.mp3)
 ├── config/          # File di configurazione per voci e parametri
+├── VOICE_SAMPLES/   # Campioni audio per voice cloning
 ├── src/             # Codice sorgente principale
+├── scripts/         # Script di setup e utilità
+├── docs/            # Documentazione completa (questo file)
 └── models/          # Cache modelli scaricati (opzionale)
 ```
 

@@ -1,0 +1,10 @@
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "prompt_speech_path": "docs/CLONAGGIO/INPUT_VOCE_da_CLONARE/Capone_01_vocals.wav",
+  "ref_text": "Sperano che l'uragano li catapulti oltre zona della bonaccia equatoriale",
+  "instruct": "Voce maschile che muta cadenza e timbro seguendo il tono e il ritmo rapido di storie d'azione, stile narratore di audioromanzi che racconta una storia con coinvolgimento emotivo, mantenendo un tono avvincente e drammatico",
+  "output_format": "wav",
+  "sample_rate": 24000,
+  "voice_notes": "Voce Capone"
+}

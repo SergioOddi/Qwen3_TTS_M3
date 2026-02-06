@@ -1,314 +1,244 @@
-# TTS_M3 - Sistema Text-to-Speech Locale
+# TTS_M3 - Converti Testo in Audio
 
-Sistema TTS (Text-to-Speech) locale basato su **Qwen3-TTS** ottimizzato per MacBook Pro M3 Max. Genera voci naturali in italiano e inglese (e altre 8 lingue) usando il modello Qwen3-TTS-12Hz-1.7B-VoiceDesign.
+Sistema Text-to-Speech locale che converte file di testo in audio naturale. Basato su Qwen3-TTS, funziona al 100% offline su MacBook Pro M3 Max.
 
-## Caratteristiche
+### USARE voci clonate
+python src/generate_cloned_audio.py -i INPUT/testo.txt -c config/sermonti.json
 
-- 🎤 **Voice Design**: Controllo vocale tramite descrizioni testuali
-- 🇮🇹 **Multilingua**: Supporto per 10 lingue (Italiano, Inglese, e altri)
-- 🚀 **Ottimizzato M3**: Usa Metal Performance Shaders per massime prestazioni
-- 📦 **Elaborazione Batch**: Processa multipli file automaticamente
-- 🎵 **Formati multipli**: Output in WAV o MP3
-- 💻 **100% Locale**: Nessuna connessione cloud richiesta
 
-## Requisiti
 
-- macOS (ottimizzato per M3 Max con 36GB RAM)
-- Python 3.12
-- Conda (Miniconda o Anaconda)
-- ~10GB spazio disco (per modelli)
 
-## Installazione Rapida
+---
 
-### 1. Clone repository
+## 🚀 Installazione (3 Passi)
+
 ```bash
+# 1. Clona il repository
 git clone <repository-url>
 cd TTS_M3
-```
 
-### 2. Setup automatico
-```bash
-./setup.sh
-```
+# 2. Esegui setup automatico
+./scripts/setup.sh
 
-Lo script di setup:
-- Crea ambiente conda `qwen3-tts`
-- Installa tutte le dipendenze
-- Configura Flash Attention 2 (opzionale)
-- Verifica installazione ffmpeg
-- Esegue test di verifica
-
-### 3. Setup manuale (alternativo)
-
-Se preferisci installare manualmente:
-
-```bash
-# Crea ambiente
-conda create -n qwen3-tts python=3.12 -y
+# 3. Attiva ambiente
 conda activate qwen3-tts
-
-# Installa dipendenze
-pip install -r requirements.txt
-
-# (Opzionale) Flash Attention 2 per migliori performance
-MAX_JOBS=4 pip install -U flash-attn --no-build-isolation
-
-# (Opzionale) ffmpeg per conversione MP3
-brew install ffmpeg
 ```
 
-## Utilizzo
+Il setup installa automaticamente tutte le dipendenze e scarica i modelli (~10GB).
 
-### Generazione Singola
+---
+
+## 📝 Utilizzo Base
+
+### 1. Crea un file di testo
 
 ```bash
-# Attiva ambiente
-conda activate qwen3-tts
-
-# Crea file di testo
-echo "Benvenuto al sistema di sintesi vocale Qwen3-TTS." > INPUT/esempio.txt
-
-# Genera audio
-python src/generate_audio.py -i INPUT/esempio.txt
-
-# Output: OUTPUT/esempio.wav
+echo "Benvenuto al sistema di sintesi vocale. Questo è un test." > INPUT/mio_testo.txt
 ```
 
-### Con Configurazione Custom
+### 2. Genera l'audio
 
 ```bash
-# Usa voce femminile
-python src/generate_audio.py \
-  -i INPUT/testo.txt \
-  -c config/voice_config_female.json
-
-# Specifica output
-python src/generate_audio.py \
-  -i INPUT/testo.txt \
-  -o OUTPUT/mio_audio.wav \
-  -c config/voice_config.json
+python src/generate_audio.py -i INPUT/mio_testo.txt
 ```
 
-### Elaborazione Batch
+### 3. Trova l'audio generato
+
+Il file audio sarà in `OUTPUT/mio_testo.wav`
+
+**È così semplice!**
+
+---
+
+## 🎯 Elaborazione Batch
+
+Converti tutti i file `.txt` nella cartella INPUT in un colpo solo:
 
 ```bash
-# Processa tutti i file .txt in INPUT/
+# Processa tutti i file
 python src/batch_process.py
 
-# Con configurazione specifica
-python src/batch_process.py -c config/voice_config_english.json
-
-# Forza rigenerazione (sovrascrive esistenti)
-python src/batch_process.py --force
+# Con configurazione voce specifica
+python src/batch_process.py -c config/voice_config_female.json
 ```
 
-## Configurazione Voci
+---
 
-I file di configurazione si trovano in `config/` e permettono di personalizzare:
+## 🎤 Configurazioni Voci Disponibili
 
-- **Lingua**: Italian, English, Chinese, Japanese, etc.
-- **Descrizione vocale**: Età, genere, tono, velocità
-- **Formato output**: WAV o MP3
-- **Sample rate**: Default 24kHz
+Usa `-c config/nome_file.json` per personalizzare la voce:
 
-### Esempio configurazione
+### Voice Design (descrizione testuale)
+- `voice_config.json` - Voce maschile italiana professionale (default)
+- `voice_config_female.json` - Voce femminile italiana energica
+- `voice_config_english.json` - Voce maschile inglese professionale
+- `voice_config_narratore.json` - Voce narratore italiano
+
+### Voice Cloning (da campione audio)
+- `gazzolo.json` - Voce clonata di Gazzolo
+- `gazzolo_docente.json` - Voce Gazzolo stile docente biochimica
+- `capone.json` - Voce clonata di Capone
+- `capone_docente.json` - Voce Capone stile docente biochimica
+- `sermonti.json` - Voce clonata di Sermonti
+
+**Voice Cloning**: Usa campioni audio in `VOICE_SAMPLES/` per clonare voci reali.
+
+---
+
+## 📚 Esempi Pratici
+
+### Esempio 1: Generazione Semplice
+
+```bash
+# Crea testo
+echo "La biochimica è lo studio delle reazioni chimiche negli organismi viventi." > INPUT/lezione.txt
+
+# Genera con voce maschile italiana
+python src/generate_audio.py -i INPUT/lezione.txt
+
+# Output: OUTPUT/lezione.wav
+```
+
+### Esempio 2: Cambiare Voce
+
+```bash
+# Voce femminile
+python src/generate_audio.py -i INPUT/lezione.txt -c config/voice_config_female.json
+
+# Voce clonata (Gazzolo)
+python src/generate_audio.py -i INPUT/lezione.txt -c config/gazzolo_docente.json
+
+# Voce inglese
+python src/generate_audio.py -i INPUT/testo_en.txt -c config/voice_config_english.json
+```
+
+### Esempio 3: Lezioni di Biochimica
+
+```bash
+# Usa preprocessor per termini scientifici + voce docente
+python src/generate_biochem_lecture.py -i INPUT/biochimica.txt -c config/gazzolo_docente.json
+```
+
+Il preprocessor corregge automaticamente la pronuncia di termini come "ATP", "NADH", "enzima", ecc.
+
+---
+
+## 🔧 Personalizzare le Voci
+
+### Voice Design (descrivi la voce che vuoi)
+
+Crea un nuovo file in `config/mia_voce.json`:
 
 ```json
 {
   "language": "Italian",
-  "voice_description": "Voce maschile matura, tono professionale e rassicurante, ritmo moderato",
-  "output_format": "wav",
-  "sample_rate": 24000
+  "voice_description": "Voce maschile giovane, tono energico e amichevole, ritmo veloce",
+  "output_format": "wav"
 }
 ```
 
-### Configurazioni Pre-installate
+Poi usalo:
+```bash
+python src/generate_audio.py -i INPUT/testo.txt -c config/mia_voce.json
+```
 
-- `voice_config.json`: Voce maschile italiana professionale
-- `voice_config_female.json`: Voce femminile italiana energica
-- `voice_config_english.json`: Voce maschile inglese professionale
+### Voice Cloning (clona una voce reale)
 
-Consulta [config/README.md](config/README.md) per esempi dettagliati di voice descriptions.
+1. Metti un campione audio (5-10 secondi) in `VOICE_SAMPLES/mia_voce.wav`
+2. Crea config `config/mia_voce.json`:
 
-## Struttura Progetto
+```json
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "voice_name": "mia_voce",
+  "prompt_speech_path": "VOICE_SAMPLES/mia_voce.wav",
+  "ref_text": "Trascrizione esatta del campione audio",
+  "output_format": "wav"
+}
+```
+
+3. Usa:
+```bash
+python src/generate_cloned_audio.py -i INPUT/testo.txt -c config/mia_voce.json
+```
+
+---
+
+## 📁 Struttura Progetto
 
 ```
 TTS_M3/
-├── INPUT/                          # File .txt da convertire
-│   └── esempio.txt
-├── OUTPUT/                         # File audio generati
-│   └── esempio.wav
-├── config/                         # Configurazioni vocali
-│   ├── voice_config.json          # Default (maschio IT)
-│   ├── voice_config_female.json   # Femmina IT
-│   ├── voice_config_english.json  # Maschio EN
-│   └── README.md                  # Guida configurazioni
-├── src/                           # Codice sorgente
-│   ├── generate_audio.py         # Generazione singola
-│   └── batch_process.py           # Elaborazione batch
-├── models/                        # Cache modelli (auto-download)
-├── requirements.txt               # Dipendenze Python
-├── setup.sh                       # Script di setup
-├── CLAUDE.md                      # Documentazione tecnica
-└── README.md                      # Questo file
+├── INPUT/              # Metti qui i file .txt da convertire
+├── OUTPUT/             # Trovi qui gli audio generati (.wav/.mp3)
+├── config/             # Configurazioni voci (personalizza qui)
+├── VOICE_SAMPLES/      # Campioni audio per voice cloning
+├── src/                # Codice sorgente (non modificare)
+├── scripts/            # Script di setup e utilità
+├── docs/               # Documentazione completa
+└── models/             # Cache modelli (auto-download)
 ```
 
-## Esempi di Utilizzo
+---
 
-### Esempio 1: Audiobook
+## ⚡ Performance su M3 Max
 
-```bash
-# Prepara capitoli
-echo "Capitolo 1: L'inizio..." > INPUT/capitolo_1.txt
-echo "Capitolo 2: Lo sviluppo..." > INPUT/capitolo_2.txt
+- **Primo avvio**: ~10-20 secondi (download modelli)
+- **Generazioni successive**: ~1-2 secondi per frase breve
+- **Batch processing**: Riutilizza modelli caricati (molto veloce)
+- **Uso RAM**: ~5-8GB (modello 1.7B + overhead)
+- **100% offline**: Nessuna connessione internet richiesta dopo setup
 
-# Genera tutti i capitoli
-python src/batch_process.py
-```
+---
 
-### Esempio 2: Voci Multiple
+## 🆘 Problemi Comuni
 
-```bash
-# Narratore principale (maschio)
-python src/generate_audio.py \
-  -i INPUT/narrazione.txt \
-  -c config/voice_config.json
-
-# Dialogo personaggio (femmina)
-python src/generate_audio.py \
-  -i INPUT/dialogo.txt \
-  -c config/voice_config_female.json
-```
-
-### Esempio 3: Contenuto Multilingua
-
-```bash
-# Testo italiano
-python src/generate_audio.py \
-  -i INPUT/testo_it.txt \
-  -c config/voice_config.json
-
-# Testo inglese
-python src/generate_audio.py \
-  -i INPUT/text_en.txt \
-  -c config/voice_config_english.json
-```
-
-## Ottimizzazioni M3 Max
-
-Il sistema è ottimizzato per M3 Max:
-
-- **Metal Performance Shaders (MPS)**: Usa GPU integrata
-- **RAM Unificata**: Sfrutta i 36GB per caricamento rapido
-- **Flash Attention 2**: Riduce latenza e uso memoria
-- **Batch Processing**: Elabora 2-4 file in parallelo
-
-### Performance Attese
-
-- Primo caricamento: ~10-20 secondi (download + init modello)
-- Generazioni successive: ~1-2 secondi per frase breve
-- Batch: Riusa modello caricato per massima efficienza
-
-## Risoluzione Problemi
-
-### Modello non si scarica
+### Il modello non si scarica
 
 ```bash
 # Download manuale
 pip install -U modelscope
-modelscope download --model Qwen/Qwen3-TTS-Tokenizer-12Hz --local_dir ./models/Qwen3-TTS-Tokenizer-12Hz
 modelscope download --model Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign --local_dir ./models/Qwen3-TTS-12Hz-1.7B-VoiceDesign
-```
-
-### Flash Attention 2 non si installa
-
-Non è critico. Il sistema funziona anche senza:
-
-```python
-# Il codice fa fallback automatico all'implementazione standard
-model = Qwen3TTSModel.from_pretrained(
-    "Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign",
-    device_map="mps",
-    dtype=torch.bfloat16,
-    # attn_implementation viene ignorato se FA2 non disponibile
-)
 ```
 
 ### Conversione MP3 fallisce
 
-Verifica installazione ffmpeg:
-
 ```bash
-# macOS
+# Installa ffmpeg
 brew install ffmpeg
-
-# Verifica
-ffmpeg -version
 ```
 
-### Errore MPS (Metal)
+### Errore "device_map"
 
-Se hai problemi con MPS, usa CPU:
-
-```python
-# In generate_audio.py, modifica:
-device_map="cpu"  # invece di "mps"
-```
-
-## Demo Web (Testing)
-
-Per testare rapidamente il modello:
-
-```bash
-conda activate qwen3-tts
-qwen-tts-demo Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign --ip 0.0.0.0 --port 8000
-```
-
-Apri http://localhost:8000 nel browser.
-
-## Lingue Supportate
-
-Il modello Qwen3-TTS supporta 10 lingue:
-
-- 🇮🇹 Italian (Italiano)
-- 🇬🇧 English (Inglese)
-- 🇨🇳 Chinese (Cinese)
-- 🇯🇵 Japanese (Giapponese)
-- 🇰🇷 Korean (Coreano)
-- 🇩🇪 German (Tedesco)
-- 🇫🇷 French (Francese)
-- 🇷🇺 Russian (Russo)
-- 🇵🇹 Portuguese (Portoghese)
-- 🇪🇸 Spanish (Spagnolo)
-
-**Nota**: Specifica sempre esplicitamente la lingua nella configurazione per migliore qualità.
-
-## Riferimenti
-
-- **Paper**: [Qwen3-TTS Technical Report](https://arxiv.org/abs/2601.15621)
-- **Hugging Face**: [Qwen3-TTS Collection](https://huggingface.co/collections/Qwen/qwen3-tts)
-- **Blog**: [Qwen AI Blog](https://qwen.ai/blog?id=qwen3tts-0115)
-- **Demo Online**: [Qwen3-TTS Space](https://huggingface.co/spaces/Qwen/Qwen3-TTS)
-
-## Licenza
-
-Consulta la licenza del modello Qwen3-TTS su Hugging Face.
-
-## Contributi
-
-Per miglioramenti o bug:
-1. Testa con file brevi prima
-2. Verifica configurazione in `config/`
-3. Controlla log di errore
-4. Apri issue con dettagli
-
-## Supporto
-
-Per domande o problemi:
-- Consulta [CLAUDE.md](CLAUDE.md) per dettagli tecnici
-- Leggi [config/README.md](config/README.md) per configurazioni vocali
-- Verifica esempi in questa guida
+Se hai problemi con GPU, modifica `src/generate_audio.py` e cambia `device_map="mps"` in `device_map="cpu"`.
 
 ---
 
-**Sviluppato dal Prof. Sergio Oddi per MacBook Pro M3 Max | Powered by Qwen3-TTS**
+## 📖 Documentazione Completa
+
+- [CLAUDE.md](docs/CLAUDE.md) - Istruzioni tecniche dettagliate per sviluppatori
+- [QUICKSTART.md](docs/QUICKSTART.md) - Guida rapida con esempi
+- [EXAMPLES.md](docs/EXAMPLES.md) - Esempi avanzati
+- [BIOCHEMISTRY-TTS.md](docs/BIOCHEMISTRY-TTS.md) - Guida per lezioni scientifiche
+- [config/README.md](config/README.md) - Guida configurazioni voci
+
+---
+
+## 🌍 Lingue Supportate
+
+🇮🇹 Italiano | 🇬🇧 Inglese | 🇪🇸 Spagnolo | 🇫🇷 Francese | 🇩🇪 Tedesco
+🇵🇹 Portoghese | 🇷🇺 Russo | 🇨🇳 Cinese | 🇯🇵 Giapponese | 🇰🇷 Coreano
+
+**Nota**: Specifica sempre la lingua nel file di configurazione per miglior qualità.
+
+---
+
+## 🔗 Riferimenti
+
+- **Paper**: [Qwen3-TTS Technical Report](https://arxiv.org/abs/2601.15621)
+- **Hugging Face**: [Qwen3-TTS Collection](https://huggingface.co/collections/Qwen/qwen3-tts)
+- **Demo Online**: [Qwen3-TTS Space](https://huggingface.co/spaces/Qwen/Qwen3-TTS)
+
+---
+
+**Sviluppato per MacBook Pro M3 Max | Powered by Qwen3-TTS**

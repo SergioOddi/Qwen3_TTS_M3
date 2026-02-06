@@ -2,8 +2,9 @@
   "mode": "voice_clone",
   "language": "Italian",
   "voice_name": "sermonti",
-  "prompt_speech_path": "docs/CLONAGGIO/INPUT_VOCE_da_CLONARE/sermonti.wav",
+  "prompt_speech_path": "VOICE_SAMPLES/sermonti.wav",
   "ref_text": "Mentre in terra il destino manda avanti le cose così e la culla di Bacco, nato due volte, è fuori pericolo, si racconta che Giove, svanito dal nettare, accantonasse i problemi seri, svagandosi a discutere con una fatua Giunone di futilità!",
+  "instruct": "Voce maschile con tono calmo e profondo, cadenza e timbro che segue il ritmo della storia, stile narratore di audioromanzi che racconta una storia con enfasi e coinvolgimento emotivo, mantenendo un tono avvincente e drammatico",
   "output_format": "wav",
   "sample_rate": 24000,
   "voice_notes": "Voce Vittorio Sermonti - clonata da campione audio originale"
