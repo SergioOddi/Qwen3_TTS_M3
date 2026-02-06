@@ -2,8 +2,16 @@
 
 Sistema Text-to-Speech locale che converte file di testo in audio naturale. Basato su Qwen3-TTS, funziona al 100% offline su MacBook Pro M3 Max.
 
-### USARE voci clonate
-python src/generate_cloned_audio.py -i INPUT/testo.txt -c config/sermonti.json
+### Voce: SERMONTI narratore
+python src/generate_cloned_audio.py -i INPUT/infiltrazione.txt -c config/sermonti_narratore.json
+
+### Voce: SERMONTI classico
+python src/generate_cloned_audio.py -i INPUT/infiltrazione.txt -c config/sermonti.json
+
+### Voce: capone narratore
+python src/generate_cloned_audio.py -i INPUT/infiltrazione.txt -c config/capone_narratore.json
+
+
 
 
 
