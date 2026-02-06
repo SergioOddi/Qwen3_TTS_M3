@@ -12,10 +12,12 @@ Funziona completamente offline
 Svantaggi:
 Richiede server Python in esecuzione
 Non è un "singolo file HTML"
+
 Opzione 2: Electron App
 App desktop completa con UI moderna
 Python backend integrato
 Più complessa ma distribuzione facile
+
 Opzione 3: Estensione della Web UI Demo Esistente
 Modificare qwen-tts-demo esistente
 Aggiungere funzionalità personalizzate
@@ -80,12 +82,16 @@ Step 4: Polish & Testing (1 ora)
   ├─ Styling finale
   ├─ Error handling
   └─ Documentazione uso
+
+
 Piano B: Estensione Demo Esistente (PIÙ VELOCE)
 
 Step 1: Analisi demo esistente (30 min)
 Step 2: Customizzazione UI (1-2 ore)
 Step 3: Aggiunta pannello competenze (1 ora)
 Step 4: Integrazione preprocessing (1 ora)
+
+
 Piano C: Electron App (PIÙ COMPLESSO)
 
 Step 1: Setup Electron + Python bridge
