@@ -1,7 +1,7 @@
 {
   "mode": "voice_clone",
   "language": "Italian",
-  "prompt_speech_path": "CLONAGGIO/INPUT_VOCE_da_CLONARE/Capone_01_vocals.wav",
+  "prompt_speech_path": "docs/CLONAGGIO/INPUT_VOCE_da_CLONARE/Capone_01_vocals.wav",
   "ref_text": "Sperano che l'uragano li catapulti oltre zona della bonaccia equatoriale",
   "output_format": "wav",
   "sample_rate": 24000,

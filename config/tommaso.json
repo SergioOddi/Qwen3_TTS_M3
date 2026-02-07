@@ -1,0 +1,9 @@
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "prompt_speech_path": "docs/CLONAGGIO/INPUT_VOCE_da_CLONARE/tommaso_01.wav",
+  "ref_text": "Ieri pomeriggio, verso le quattro e mezzo, ho attraversato velocemente piazza Colli Albani, mentre il vento leggero muoveva le foglie e qualcuno, poco lontano, rideva parlando a voce bassa; mi sono fermato un attimo, ho guardato l’orologio e ho pensato: che strana, intensa e imprevedibile avventura è la vita, davvero.",
+  "output_format": "wav",
+  "sample_rate": 24000,
+  "voice_notes": "Voce Tommaso"
+}

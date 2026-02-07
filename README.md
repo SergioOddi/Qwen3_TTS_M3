@@ -2,14 +2,34 @@
 
 Sistema Text-to-Speech locale che converte file di testo in audio naturale. Basato su Qwen3-TTS, funziona al 100% offline su MacBook Pro M3 Max.
 
-### Voce: SERMONTI narratore
-python src/generate_cloned_audio.py -i INPUT/infiltrazione.txt -c config/sermonti_narratore.json
+---
 
-### Voce: SERMONTI classico
-python src/generate_cloned_audio.py -i INPUT/infiltrazione.txt -c config/sermonti.json
+## 🚀 Guide Pratiche
 
-### Voce: capone narratore
-python src/generate_cloned_audio.py -i INPUT/infiltrazione.txt -c config/capone_narratore.json
+📝 **[TESTO_IN_VOCE.md](TESTO_IN_VOCE.md)** - Converti testo in audio (2 passi)
+🎙️ **[CLONAZIONE_VOCE.md](CLONAZIONE_VOCE.md)** - Clona una voce reale (3 passi)
+
+---
+
+## ⚡ Esempi Rapidi
+
+### Converti Testo in Audio
+```bash
+echo "Benvenuto al sistema TTS" > INPUT/test.txt
+python src/generate_audio.py -i INPUT/test.txt
+```
+
+### Usa Voce Clonata
+```bash
+# Voce Sermonti Narratore
+python src/generate_cloned_audio.py -i INPUT/testo.txt -c config/sermonti_narratore.json
+
+# Voce Gazzolo Docente
+python src/generate_cloned_audio.py -i INPUT/testo.txt -c config/gazzolo_docente.json
+
+# Voce Capone Narratore
+python src/generate_cloned_audio.py -i INPUT/testo.txt -c config/capone_narratore.json
+```
 
 
 
@@ -224,11 +244,18 @@ Se hai problemi con GPU, modifica `src/generate_audio.py` e cambia `device_map="
 
 ## 📖 Documentazione Completa
 
-- [CLAUDE.md](docs/CLAUDE.md) - Istruzioni tecniche dettagliate per sviluppatori
-- [QUICKSTART.md](docs/QUICKSTART.md) - Guida rapida con esempi
-- [EXAMPLES.md](docs/EXAMPLES.md) - Esempi avanzati
-- [BIOCHEMISTRY-TTS.md](docs/BIOCHEMISTRY-TTS.md) - Guida per lezioni scientifiche
-- [config/README.md](config/README.md) - Guida configurazioni voci
+### Guide Pratiche (⭐ Inizia da qui)
+- **[TESTO_IN_VOCE.md](TESTO_IN_VOCE.md)** - Come convertire testo in audio
+- **[CLONAZIONE_VOCE.md](CLONAZIONE_VOCE.md)** - Come clonare una voce
+
+### Documentazione Dettagliata
+- [CLAUDE.md](CLAUDE.md) - Istruzioni tecniche per sviluppatori
+- [docs/QUICKSTART.md](docs/QUICKSTART.md) - Guida rapida
+- [docs/EXAMPLES.md](docs/EXAMPLES.md) - Esempi avanzati
+- [docs/BIOCHEMISTRY_TTS_GUIDE.md](docs/BIOCHEMISTRY_TTS_GUIDE.md) - Lezioni scientifiche
+- [docs/VOICE_CLONING_GUIDE.md](docs/VOICE_CLONING_GUIDE.md) - Voice cloning dettagliato
+- [docs/VOCI_DISPONIBILI.md](docs/VOCI_DISPONIBILI.md) - Catalogo voci clonate
+- [config/README.md](config/README.md) - Configurazioni voci
 
 ---
 

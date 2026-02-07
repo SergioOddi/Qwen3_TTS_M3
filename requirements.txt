@@ -5,6 +5,9 @@ qwen-tts>=0.0.5
 soundfile>=0.12.1
 pydub>=0.25.1
 
+# Web app
+Flask>=3.0.0
+
 # Model downloading (optional)
 modelscope>=1.11.0
 

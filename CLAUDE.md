@@ -299,6 +299,20 @@ sf.write("output.wav", wavs[0], sr)
 - [ ] Aggiungere voice emotion control (controllo emozioni vocali)
 - [ ] Testare voice cloning con diverse lingue source/target
 
+## Guide Pratiche
+
+**Per utenti finali** (⭐ inizia da qui):
+
+- **[TESTO_IN_VOCE.md](TESTO_IN_VOCE.md)** - Guida pratica per convertire testo in audio (2 passi)
+- **[CLONAZIONE_VOCE.md](CLONAZIONE_VOCE.md)** - Guida pratica per clonare una voce (3 passi)
+
+**Documentazione dettagliata**:
+
+- **[docs/VOICE_CLONING_GUIDE.md](docs/VOICE_CLONING_GUIDE.md)** - Guida completa voice cloning
+- **[docs/BIOCHEMISTRY_TTS_GUIDE.md](docs/BIOCHEMISTRY_TTS_GUIDE.md)** - Guida lezioni scientifiche
+- **[docs/VOCI_DISPONIBILI.md](docs/VOCI_DISPONIBILI.md)** - Catalogo voci clonate disponibili
+- **[config/README.md](config/README.md)** - Configurazioni voci disponibili
+
 ## Riferimenti
 
 - **Paper**: https://arxiv.org/abs/2601.15621
