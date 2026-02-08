@@ -1,0 +1,11 @@
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "voice_name": "capone_02",
+  "prompt_speech_path": "CLONAGGIO/INPUT_VOCE_da_CLONARE/capone_02.wav",
+  "ref_text": "Questa sera siamo qui riuniti... per dire:    "addio" al nostro caro amico Arold... Questo naturalmente ci rattrista non poco e tuttavia non sarebbe giusto lasciarlo andare via senza ricordare i bei tempi.",
+  "instruct": "Voce maschile con tono calmo e profondo, cadenza rilassata e riflessiva, stile da documentarista professionista che spiega concetti complessi con chiarezza e pazienza",
+  "output_format": "wav",
+  "sample_rate": 24000,
+  "voice_notes": "Voce Capone clonata + stile documentarista professionista"
+}
