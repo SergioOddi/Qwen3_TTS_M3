@@ -1,7 +1,7 @@
 {
   "mode": "voice_clone",
   "language": "Italian",
-  "voice_name": "capone_docente",
+  "voice_name": "capone_03",
   "prompt_speech_path": "CLONAGGIO/INPUT_VOCE_da_CLONARE/Capone_01_vocals.wav",
   "ref_text": "Sperano che l'uragano li catapulti oltre zona della bonaccia equatoriale",
   "instruct": "Voce maschile con tono calmo e profondo, cadenza rilassata e riflessiva, stile professore di biochimica che spiega concetti complessi con chiarezza e pazienza",
