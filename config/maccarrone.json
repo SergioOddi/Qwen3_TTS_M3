@@ -1,0 +1,10 @@
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "voice_name": "maccarrone",
+  "prompt_speech_path": "docs/CLONAGGIO/INPUT_VOCE_da_CLONARE/maccarrone_01.wav",
+  "ref_text": "E di fatto anche le emozioni che noi proviamo hanno delle basi molecolari che la scienza ormai sta definendo sempre più in dettaglio. Bene, la capacità di produrre vino più o meno eh, ci può far pensare a regioni famosissime come il Piemonte, eh? Questo vino, per ragioni storiche, continua ad essere in maggior parte non assolutamente preponderante, ma a maggior parte rosso e rosato, in parte un po minore, bianco... e vanta ben tre vette nel campo della difesa della qualità dei vini, cioè le denominazioni di origine controllata e garantita: le DOCG.",
+  "output_format": "wav",
+  "sample_rate": 24000,
+  "voice_notes": "Voce Mauro Maccarrone - clonata da campione audio originale"
+}
