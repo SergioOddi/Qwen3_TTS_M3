@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(conda run:*)"
+      "Bash(conda run:*)",
+      "Bash(ffprobe -v quiet -show_entries format=duration -of csv=p=0 \"/Users/sergiooddi/Claude-Code/GitHUB repos/TTS_M3/docs/CLONAGGIO/INPUT_VOCE_da_CLONARE/dudu02.m4a\")"
+    ],
+    "additionalDirectories": [
+      "/Users/sergiooddi/Claude-Code/GitHUB repos/TTS_M3/docs/CLONAGGIO/INPUT_VOCE_da_CLONARE"
     ]
   }
 }
