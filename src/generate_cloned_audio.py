@@ -92,6 +92,8 @@ def generate_cloned_audio(
     ref_text = config.get('ref_text', '')
     output_format = config.get('output_format', 'wav')
     voice_notes = config.get('voice_notes', '')
+    speed_factor = config.get('speed_factor', 1.0)
+    instruct = config.get('instruct', '')
 
     # Verifica presenza campione audio
     if not prompt_speech_path:
@@ -139,6 +141,10 @@ def generate_cloned_audio(
     print(f"📄 Trascrizione: {ref_text[:50]}{'...' if len(ref_text) > 50 else ''}")
     if voice_notes:
         print(f"📌 Note: {voice_notes}")
+    if instruct:
+        print(f"🎭 Stile: {instruct}")
+    if speed_factor != 1.0:
+        print(f"⏱️  Velocità: {speed_factor}x (post-processing)")
 
     # Carica modello se non fornito
     model_loaded = False
@@ -170,19 +176,42 @@ def generate_cloned_audio(
     # Genera audio
     try:
         print("🎵 Generazione audio in corso (voice cloning)...")
-        wavs, sr = model.generate_voice_clone(
+
+        # Prova a passare instruct se specificato nel config
+        clone_kwargs = dict(
             text=text,
             language=language,
             ref_audio=prompt_speech_path,
             ref_text=ref_text,
         )
+        if instruct:
+            clone_kwargs['instruct'] = instruct
+
+        try:
+            wavs, sr = model.generate_voice_clone(**clone_kwargs)
+        except TypeError:
+            # Il modello non supporta 'instruct', riprova senza
+            print("⚠ Il modello non supporta 'instruct', proseguo senza parametro stile")
+            clone_kwargs.pop('instruct', None)
+            wavs, sr = model.generate_voice_clone(**clone_kwargs)
+
+        # Applica time-stretching se speed_factor != 1.0
+        audio_data = wavs[0]
+        if speed_factor != 1.0:
+            try:
+                import librosa
+                print(f"⏱️  Applicazione time-stretch (factor={speed_factor})...")
+                audio_data = librosa.effects.time_stretch(audio_data.astype('float32'), rate=speed_factor)
+                print("✓ Time-stretch applicato")
+            except ImportError:
+                print("⚠ librosa non installato, speed_factor ignorato. Installa con: pip install librosa")
 
         # Salva file WAV
         output_path = Path(output_file)
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
         wav_file = str(output_path.with_suffix('.wav'))
-        sf.write(wav_file, wavs[0], sr)
+        sf.write(wav_file, audio_data, sr)
         print(f"✓ File WAV generato: {wav_file}")
 
         # Converti in MP3 se richiesto

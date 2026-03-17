@@ -6,5 +6,7 @@
   "ref_text": "Oh, come mi sono divertito! Oh, come mi sono divertito da morire, da ridere, da morire! Sono sempre io, Dudù, il gagà. E questa ve la racconto, ve la racconto questa qua. Dunque eravamo io, Pupi Fatebenefratelli, dei Fatebenefratelli, di Sette sorelle di Sotto e Foffi. Stavamo discutendo animatamente sulla crisi della coltura delle barbabietole nel Nicaragua, nel Nicaragua del nord del Nord, quando t'arriva il solito Cocò di Caprarello.",
   "output_format": "wav",
   "sample_rate": 24000,
+  "speed_factor": 0.88,
+  "instruct": "Parla lentamente, con tono teatrale e recitativo, dando peso drammatico alle parole chiave, con pause espressive.",
   "voice_notes": "Voce Dudù - clonata da campione audio originale"
 }
