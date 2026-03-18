@@ -291,7 +291,7 @@ Esempi:
     # Determina path output se non specificato
     if args.output is None:
         input_name = Path(args.input).stem
-        args.output = f"OUTPUT/{input_name}_by_{voice_name}.{output_format}"
+        args.output = f"OUTPUT/{input_name}.{output_format}"
 
     # Verifica file input esista
     if not os.path.exists(args.input):

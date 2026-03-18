@@ -114,7 +114,7 @@ def batch_clone_process(
     print(f"{'='*60}")
 
     for text_file in tqdm(text_files, desc="Elaborazione"):
-        output_file = Path(output_dir) / f"{text_file.stem}_by_{voice_name}.{output_format}"
+        output_file = Path(output_dir) / f"{text_file.stem}.{output_format}"
 
         # Salta se esiste già
         if skip_existing and output_file.exists():

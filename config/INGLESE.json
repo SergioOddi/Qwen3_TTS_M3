@@ -1,8 +1,9 @@
 {
   "mode": "voice_clone",
   "language": "English",
-  "voice_name": "Professore_Inglese_001",
+  "voice_name": "Prof._Inglese_001",
   "prompt_speech_path": "docs/CLONAGGIO/INPUT_VOCE_da_CLONARE/INGLESE_001.wav",
+  "instruct": "Speak slowly and clearly, with warm, calm and authoritative tone, suitable for teaching complex concepts to non-native English speakers.",
   "ref_text": "This chapter is about how proteins work — not just what they look like, but what they actually do inside the cell. Proteins are not rigid, frozen structures. They move, change shape, and interact with other molecules. These interactions are temporary: proteins bind to other molecules and then let go.The molecules that bind to proteins are called ligands. To understand how a protein functions, we need to understand how it binds to its ligands, and what happens to the protein when it does.",
   "output_format": "wav",
   "sample_rate": 24000,
