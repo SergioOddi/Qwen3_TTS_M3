@@ -1,0 +1,11 @@
+{
+  "mode": "voice_clone",
+  "language": "English",
+  "voice_name": "Prof._Inglese_001",
+  "prompt_speech_path": "docs/CLONAGGIO/INPUT_VOCE_da_CLONARE/INGLESE_002.wav",
+  "instruct": "Speak slowly and clearly, with warm and calm tone, suitable to non-native English speakers.",
+  "ref_text": "The four subunits of hemoglobin are held together by strong contacts between them. The interface between the alpha1 and beta1 subunits involves more than 30 amino acid residues, held together mainly by hydrophobic forces, hydrogen bonds, and ionic interactions. The alpha1-beta2 interface involves 19 residues.These interfaces are not just structural. They are the key sites where the T to R conformational change happens during oxygen binding. Without these specific contacts, cooperative oxygen binding would not be possible.",
+  "output_format": "wav",
+  "sample_rate": 24000,
+  "voice_notes": "Voce insegnante inglese - clonata da campione audio originale"
+}

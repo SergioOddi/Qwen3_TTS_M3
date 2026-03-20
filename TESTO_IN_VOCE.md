@@ -2,6 +2,14 @@
 
 Questa guida ti spiega come convertire un testo in audio in modo semplice e veloce.
 
+## Lettura testo inglese da SPEAKER INGLESE_002b
+#per un buon tts di testo da slide di una lezione un ottimo modello è questo: 
+python src/batch_clone_process.py -c config/INGLESE_002i.json
+
+
+
+
+
 ---
 
 ## ⚡ Quick Start (2 passi)
