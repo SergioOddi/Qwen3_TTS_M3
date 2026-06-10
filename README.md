@@ -4,6 +4,24 @@ Sistema Text-to-Speech locale che converte file di testo in audio naturale. Basa
 
 ---
 
+## 🚀 App standalone (web UI locale)
+
+Avvia l'interfaccia grafica nel browser:
+
+```bash
+./launch.sh
+```
+
+Si apre su http://127.0.0.1:8000 con tre schede:
+- **Genera** — testo → voce → audio (player + download wav/mp3)
+- **Batch** — più testi in coda con la stessa voce
+- **Voci** — libreria voci con preview + creazione voce clonata (registra dal
+  microfono o carica un file, trascrizione automatica Whisper o manuale)
+
+Tutto in locale e offline. Prima generazione più lenta (caricamento modello).
+
+---
+
 ## 🚀 Guide Pratiche
 
 📝 **[TESTO_IN_VOCE.md](TESTO_IN_VOCE.md)** - Converti testo in audio (2 passi)
