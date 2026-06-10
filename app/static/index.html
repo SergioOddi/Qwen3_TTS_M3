@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TTS_M3 — Studio Voce</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <h1>🎙️ TTS_M3 — Studio Voce</h1>
+    <nav>
+      <button class="tab active" data-tab="genera">Genera</button>
+      <button class="tab" data-tab="batch">Batch</button>
+      <button class="tab" data-tab="voci">Voci</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- GENERA -->
+    <section id="genera" class="panel active">
+      <label>Testo</label>
+      <textarea id="g-text" rows="8" placeholder="Scrivi o incolla il testo…"></textarea>
+      <div class="row">
+        <div>
+          <label>Voce</label>
+          <select id="g-voice"></select>
+        </div>
+        <div>
+          <label>Formato</label>
+          <select id="g-format"><option>wav</option><option>mp3</option></select>
+        </div>
+        <label class="check"><input type="checkbox" id="g-biochem"> Preprocessing biochimica</label>
+      </div>
+      <audio id="g-preview" controls class="hidden"></audio>
+      <button id="g-run" class="primary">Genera audio</button>
+      <div id="g-status" class="status"></div>
+      <audio id="g-player" controls class="hidden"></audio>
+      <a id="g-download" class="hidden" download>⬇ Scarica</a>
+    </section>
+
+    <!-- BATCH -->
+    <section id="batch" class="panel">
+      <p>Aggiungi più testi: stessa voce, generati in coda.</p>
+      <div id="b-items"></div>
+      <button id="b-add">+ Aggiungi testo</button>
+      <div class="row">
+        <div><label>Voce</label><select id="b-voice"></select></div>
+        <div><label>Formato</label><select id="b-format"><option>wav</option><option>mp3</option></select></div>
+        <label class="check"><input type="checkbox" id="b-biochem"> Biochimica</label>
+      </div>
+      <button id="b-run" class="primary">Avvia batch</button>
+      <div id="b-status" class="status"></div>
+      <ul id="b-results"></ul>
+    </section>
+
+    <!-- VOCI -->
+    <section id="voci" class="panel">
+      <h2>Libreria voci</h2>
+      <div id="v-list" class="cards"></div>
+      <h2>Nuova voce clonata</h2>
+      <div class="form">
+        <label>Nome</label><input id="v-name" type="text">
+        <label>Lingua</label>
+        <select id="v-language">
+          <option>Italian</option><option>English</option><option>Spanish</option>
+          <option>French</option><option>German</option>
+        </select>
+        <label>Campione audio</label>
+        <div class="row">
+          <button id="v-rec">● Registra</button>
+          <span id="v-rec-time">00:00</span>
+          <input id="v-file" type="file" accept="audio/*">
+        </div>
+        <audio id="v-sample" controls class="hidden"></audio>
+        <label>Trascrizione (ref_text)</label>
+        <textarea id="v-reftext" rows="3" placeholder="Scrivi a mano o usa Trascrivi…"></textarea>
+        <button id="v-transcribe">Trascrivi automaticamente</button>
+        <label>Stile (instruct, opzionale)</label>
+        <input id="v-instruct" type="text">
+        <label>Tag (separati da virgola)</label>
+        <input id="v-tags" type="text" placeholder="docente, narratore">
+        <button id="v-save" class="primary">Salva voce</button>
+        <div id="v-status" class="status"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>
