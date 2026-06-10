@@ -17,3 +17,11 @@ modelscope>=1.11.0
 # Utilities
 torch>=2.0.0
 tqdm>=4.65.0
+
+# App standalone (web UI locale)
+uvicorn>=0.30.0
+python-multipart>=0.0.9
+mlx-whisper>=0.4.0
+
+# Test
+pytest>=8.0.0
