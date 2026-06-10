@@ -87,8 +87,9 @@ file su disco in `OUTPUT/`.
 - `list_voices()` → elenco normalizzato: id (nome file senza estensione), tipo
   (design|clone), language, descrizione/note, tag, path campione (se clone).
 - `get_sample_path(id)` → per la preview audio.
-- `create_clone(name, language, audio_bytes, ref_text, instruct?, tags?)` → salva il
-  campione in `VOICE_SAMPLES/`, scrive `config/<name>.json`, ritorna la voce creata.
+- `create_clone(name, language, audio_bytes, ref_text, instruct?, tags?)` → converte il
+  campione in WAV mono 24 kHz, lo salva in `VOICE_SAMPLES/`, scrive `config/<name>.json`,
+  ritorna la voce creata. Accetta sia upload di file sia blob registrato dal microfono.
 Tag derivati da convenzioni esistenti (es. suffisso `_docente`, `_narratore`) e/o campo
 `tags` aggiunto al JSON.
 
@@ -124,8 +125,21 @@ modo lazy. Usato solo dall'endpoint di trascrizione.
 2. **Batch** — aggiunta di più testi (incolla o carica .txt), una voce comune, avvio
    coda, lista risultati con stato e download per ciascuno.
 3. **Voci** — catalogo voci con tag e preview audio; form "Nuova voce clonata":
-   upload o registrazione campione → bottone "Trascrivi" (Whisper) **oppure** ref_text
-   manuale → nome, lingua, instruct opzionale, tag → salva.
+   sorgente campione = **registrazione dal microfono del Mac** (MediaRecorder API del
+   browser, offline, niente dipendenze extra) **oppure** upload di un file audio → si
+   riascolta il campione → bottone "Trascrivi" (Whisper) **oppure** ref_text manuale →
+   nome, lingua, instruct opzionale, tag → salva.
+
+### Registrazione microfono
+
+- Cattura via `navigator.mediaDevices.getUserMedia` + `MediaRecorder` nel browser:
+  pulsante rec/stop, timer, waveform o livello opzionale, riascolto prima di salvare.
+- Il blob registrato (webm/ogg) viene inviato a `POST /api/voices` come fa l'upload.
+  Lato server, `voices.py` converte il campione in WAV mono 24 kHz (formato atteso dal
+  cloning) con pydub/soundfile prima di salvarlo in `VOICE_SAMPLES/`.
+- Stesso blob riusabile per `POST /api/transcribe` (trascrizione auto del ref_text).
+- Richiede contesto sicuro: `127.0.0.1`/`localhost` è considerato sicuro dai browser,
+  quindi getUserMedia funziona senza HTTPS.
 
 ### Gestione errori
 
