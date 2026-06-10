@@ -21,7 +21,8 @@ class ModelManager:
                 repo, device_map="mps", dtype=torch.bfloat16,
                 attn_implementation="flash_attention_2",
             )
-        except Exception:
+        except (RuntimeError, ImportError, ValueError):
+            # flash_attention_2 non disponibile: fallback a implementazione standard
             return Qwen3TTSModel.from_pretrained(
                 repo, device_map="mps", dtype=torch.bfloat16,
             )

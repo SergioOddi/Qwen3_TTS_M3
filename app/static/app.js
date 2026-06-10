@@ -1,5 +1,7 @@
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => document.querySelectorAll(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g,
+  (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
 // --- Tabs ---
 $$(".tab").forEach((t) => t.onclick = () => {
@@ -16,22 +18,37 @@ async function loadVoices() {
   voicesCache = await r.json();
   for (const sel of ["#g-voice", "#b-voice"]) {
     $(sel).innerHTML = voicesCache
-      .map((v) => `<option value="${v.id}">${v.id} (${v.type})</option>`).join("");
+      .map((v) => `<option value="${esc(v.id)}">${esc(v.id)} (${esc(v.type)})</option>`).join("");
   }
   renderVoiceCards();
+  updateGenPreview();
 }
 
 function renderVoiceCards() {
   $("#v-list").innerHTML = voicesCache.map((v) => `
     <div class="card">
-      <h3>${v.id}</h3>
-      <div>${v.tags.map((t) => `<span class="badge">${t}</span>`).join("")}
-           <span class="badge">${v.type}</span></div>
-      <div class="desc">${v.description || ""}</div>
+      <h3>${esc(v.id)}</h3>
+      <div>${v.tags.map((t) => `<span class="badge">${esc(t)}</span>`).join("")}
+           <span class="badge">${esc(v.type)}</span></div>
+      <div class="desc">${esc(v.description || "")}</div>
       ${v.type === "clone"
-        ? `<audio controls src="/api/voices/${v.id}/sample"></audio>` : ""}
+        ? `<audio controls src="/api/voices/${encodeURIComponent(v.id)}/sample"></audio>` : ""}
     </div>`).join("");
 }
+
+// Preview della voce selezionata nella scheda Genera (solo voci clone hanno campione)
+function updateGenPreview() {
+  const v = voicesCache.find((x) => x.id === $("#g-voice").value);
+  const prev = $("#g-preview");
+  if (v && v.type === "clone") {
+    prev.src = `/api/voices/${encodeURIComponent(v.id)}/sample`;
+    prev.classList.remove("hidden");
+  } else {
+    prev.removeAttribute("src");
+    prev.classList.add("hidden");
+  }
+}
+$("#g-voice").onchange = updateGenPreview;
 
 // --- Polling job ---
 async function pollJob(jid, onProgress) {
@@ -54,7 +71,8 @@ $("#g-run").onclick = async () => {
     method: "POST", headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       text, voice_id: $("#g-voice").value,
-      format: $("#g-format").value, biochem: $("#g-biochem").checked }),
+      format: $("#g-format").value, biochem: $("#g-biochem").checked,
+      speed: parseFloat($("#g-speed").value) }),
   });
   if (!r.ok) { setStatus("#g-status", "Errore: " + (await r.text()), "err"); return; }
   const { job_id } = await r.json();
@@ -72,8 +90,8 @@ $("#g-run").onclick = async () => {
 function addBatchItem(name = "", text = "") {
   const div = document.createElement("div");
   div.className = "b-item";
-  div.innerHTML = `<input placeholder="nome" value="${name}">
-                   <textarea rows="2" placeholder="testo">${text}</textarea>`;
+  div.innerHTML = `<input placeholder="nome" value="${esc(name)}">
+                   <textarea rows="2" placeholder="testo">${esc(text)}</textarea>`;
   $("#b-items").appendChild(div);
 }
 $("#b-add").onclick = () => addBatchItem();

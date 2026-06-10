@@ -3,6 +3,12 @@ from app import voices
 from tests.conftest import _write
 
 
+def test_get_voice_rejects_path_traversal(tmp_dirs):
+    assert voices.get_voice("../requirements") is None
+    assert voices.get_voice("../../etc/passwd") is None
+    assert voices.get_voice("foo/bar") is None
+
+
 def test_list_voices_separates_design_and_clone(tmp_dirs):
     _write(tmp_dirs["config"], "narratore", {
         "language": "Italian",

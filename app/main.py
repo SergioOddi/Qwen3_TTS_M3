@@ -1,8 +1,10 @@
 """FastAPI app: REST API + serve la single-page UI."""
+import os
 from pathlib import Path
+from typing import Literal
 
 from fastapi import FastAPI, Form, HTTPException, UploadFile, File
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -17,8 +19,9 @@ STATIC_DIR = Path(__file__).resolve().parent / "static"
 class GenerateReq(BaseModel):
     text: str
     voice_id: str
-    format: str = "wav"
+    format: Literal["wav", "mp3"] = "wav"
     biochem: bool = False
+    speed: float = 1.0
 
 
 class BatchItem(BaseModel):
@@ -29,7 +32,7 @@ class BatchItem(BaseModel):
 class BatchReq(BaseModel):
     items: list[BatchItem]
     voice_id: str
-    format: str = "wav"
+    format: Literal["wav", "mp3"] = "wav"
     biochem: bool = False
 
 
@@ -78,6 +81,11 @@ def create_app(model_manager=None, job_queue=None) -> FastAPI:
             return {"text": transcribe(tmp, language)}
         except RuntimeError as e:
             raise HTTPException(503, str(e))
+        finally:
+            try:
+                os.unlink(tmp)
+            except OSError:
+                pass
 
     @app.post("/api/generate")
     def api_generate(req: GenerateReq):
@@ -87,7 +95,8 @@ def create_app(model_manager=None, job_queue=None) -> FastAPI:
             raise HTTPException(404, "voce non trovata")
         jid = jobs.submit(lambda progress: pipeline.run_generation(
             mm, text=req.text, voice_id=req.voice_id,
-            fmt=req.format, biochem=req.biochem, progress=progress))
+            fmt=req.format, biochem=req.biochem, speed=req.speed,
+            progress=progress))
         return {"job_id": jid}
 
     @app.post("/api/batch")

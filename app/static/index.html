@@ -32,6 +32,10 @@
         </div>
         <label class="check"><input type="checkbox" id="g-biochem"> Preprocessing biochimica</label>
       </div>
+      <label>Velocità <span id="g-speed-val">1.0×</span> <small>(solo voci clonate)</small></label>
+      <input type="range" id="g-speed" min="0.5" max="2" step="0.05" value="1"
+             oninput="document.getElementById('g-speed-val').textContent = parseFloat(this.value).toFixed(2) + '×'">
+      <label>Anteprima voce selezionata</label>
       <audio id="g-preview" controls class="hidden"></audio>
       <button id="g-run" class="primary">Genera audio</button>
       <div id="g-status" class="status"></div>

@@ -46,12 +46,21 @@ def list_voices() -> list[dict]:
     return out
 
 
+def _safe_voice_id(voice_id: str) -> bool:
+    """Accetta solo id senza separatori di path o '..' (no path traversal)."""
+    return bool(voice_id) and Path(voice_id).name == voice_id and ".." not in voice_id
+
+
 def get_voice(voice_id: str) -> dict | None:
+    if not _safe_voice_id(voice_id):
+        return None
     path = appconfig.CONFIG_DIR / f"{voice_id}.json"
     return _voice_info(path) if path.exists() else None
 
 
 def load_config(voice_id: str) -> dict:
+    if not _safe_voice_id(voice_id):
+        raise ValueError(f"voice_id non valido: {voice_id}")
     path = appconfig.CONFIG_DIR / f"{voice_id}.json"
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -98,11 +107,15 @@ def create_clone(name, language, audio_bytes, ref_text, instruct="", tags=None):
     sample_path = appconfig.SAMPLES_DIR / f"{slug}.wav"
     _to_wav_24k_mono(audio_bytes, sample_path)
 
+    try:
+        stored_path = str(sample_path.relative_to(appconfig.PROJECT_ROOT))
+    except ValueError:
+        stored_path = str(sample_path)  # fuori dal repo (es. test): path assoluto
     cfg = {
         "mode": "voice_clone",
         "language": language,
         "voice_name": slug,
-        "prompt_speech_path": str(sample_path),
+        "prompt_speech_path": stored_path,
         "ref_text": ref_text.strip(),
         "output_format": "wav",
         "sample_rate": 24000,

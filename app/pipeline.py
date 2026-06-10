@@ -33,7 +33,7 @@ def _to_mp3(wav_path: str) -> str:
 
 
 def run_generation(model_manager, text, voice_id, fmt="wav",
-                   biochem=False, out_name=None, progress=None):
+                   biochem=False, out_name=None, progress=None, speed=None):
     info = voices.get_voice(voice_id)
     if info is None:
         raise ValueError(f"voce non trovata: {voice_id}")
@@ -54,14 +54,15 @@ def run_generation(model_manager, text, voice_id, fmt="wav",
         sample = voices.get_sample_path(voice_id)
         if sample is None:
             raise ValueError("campione audio mancante per la voce clonata")
+        speed_factor = speed if speed is not None else cfg.get("speed_factor", 1.0)
         audio, sr = model_manager.generate_clone(
             text=text, language=info["language"], ref_audio=str(sample),
             ref_text=cfg.get("ref_text", ""), instruct=cfg.get("instruct"),
-            speed_factor=cfg.get("speed_factor", 1.0))
+            speed_factor=speed_factor)
     if progress:
         progress(0.8)
 
-    name = out_name or f"{_safe_name(text)}_by_{voice_id}"
+    name = _safe_name(out_name) if out_name else f"{_safe_name(text)}_by_{voice_id}"
     wav_path = str(appconfig.OUTPUT_DIR / f"{name}.wav")
     sf.write(wav_path, audio, sr)
     return _to_mp3(wav_path) if fmt == "mp3" else wav_path
