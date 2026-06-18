@@ -142,10 +142,9 @@ function updateGenPreview() {
 $("#g-voice").onchange = updateGenPreview;
 
 // --- Polling job ---
-async function pollJob(jid, onProgress) {
+async function pollJob(jid) {
   while (true) {
     const job = await (await fetch(`/api/jobs/${jid}`)).json();
-    onProgress(job);
     if (job.status === "done" || job.status === "error") return job;
     await new Promise((r) => setTimeout(r, 400));
   }
@@ -167,8 +166,8 @@ $("#g-run").onclick = async () => {
   });
   if (!r.ok) { setStatus("#g-status", "Errore: " + (await r.text()), "err"); return; }
   const { job_id } = await r.json();
-  const job = await pollJob(job_id, (j) =>
-    setStatus("#g-status", `Generazione… ${Math.round(j.progress * 100)}%`, ""));
+  setStatus("#g-status", "Generazione in corso…", "");
+  const job = await pollJob(job_id);
   if (job.status === "error") { setStatus("#g-status", "Errore: " + job.error, "err"); return; }
   const file = job.result.split("/").pop();
   const url = `/api/outputs/${file}`;
@@ -201,8 +200,8 @@ $("#b-run").onclick = async () => {
       format: $("#b-format").value, biochem: $("#b-biochem").checked }),
   });
   const { job_id } = await r.json();
-  const job = await pollJob(job_id, (j) =>
-    setStatus("#b-status", `Batch… ${Math.round(j.progress * 100)}%`, ""));
+  setStatus("#b-status", "Batch in corso…", "");
+  const job = await pollJob(job_id);
   if (job.status === "error") { setStatus("#b-status", "Errore: " + job.error, "err"); return; }
   $("#b-results").innerHTML = job.result.map((p) => {
     const f = p.split("/").pop();
@@ -263,7 +262,7 @@ async function regenBlock(div) {
   const clip = div.querySelector(".t-clip");
   const prog = div.querySelector(".t-prog");
   clip.classList.add("hidden");
-  prog.value = 0; prog.classList.remove("hidden");
+  prog.classList.remove("hidden");   // indeterminata: il TTS non espone un % reale
   const r = await fetch("/api/generate", {
     method: "POST", headers: { "Content-Type": "application/json" },
     // clip sempre wav: la scena lo riusa per lo stitch (sf.read non legge mp3)
@@ -273,10 +272,7 @@ async function regenBlock(div) {
   });
   if (!r.ok) { prog.classList.add("hidden"); setStatus("#t-status", "Errore: " + (await r.text()), "err"); return; }
   const { job_id } = await r.json();
-  const job = await pollJob(job_id, (j) => {
-    prog.value = j.progress * 100;
-    setStatus("#t-status", `Rigenero… ${Math.round(j.progress * 100)}%`, "");
-  });
+  const job = await pollJob(job_id);
   if (job.status === "error") { prog.classList.add("hidden"); setStatus("#t-status", "Errore: " + job.error, "err"); return; }
   prog.classList.add("hidden");
   clip.src = "/api/outputs/" + job.result.split("/").pop();
@@ -292,7 +288,7 @@ $("#t-run").onclick = async () => {
   setStatus("#t-status", "Unisco le battute…", "");
   $("#t-scene").classList.add("hidden"); $("#t-download").classList.add("hidden");
   const prog = $("#t-progress");
-  prog.value = 0; prog.classList.remove("hidden");
+  prog.classList.remove("hidden");
   const r = await fetch("/api/teatro", {
     method: "POST", headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ blocks: blocks.map(blockToApi),
@@ -300,10 +296,7 @@ $("#t-run").onclick = async () => {
   });
   if (!r.ok) { prog.classList.add("hidden"); setStatus("#t-status", "Errore: " + (await r.text()), "err"); return; }
   const { job_id } = await r.json();
-  const job = await pollJob(job_id, (j) => {
-    prog.value = j.progress * 100;
-    setStatus("#t-status", `Unisco le battute… ${Math.round(j.progress * 100)}%`, "");
-  });
+  const job = await pollJob(job_id);
   if (job.status === "error") { prog.classList.add("hidden"); setStatus("#t-status", "Errore: " + job.error, "err"); return; }
   prog.classList.add("hidden");
   const name = job.result.scene.split("/").pop();   // scena.wav o scena.mp3
@@ -334,12 +327,23 @@ $("#t-import-btn").onclick = () => $("#t-import").click();
 $("#t-import").onchange = async (e) => {
   const file = e.target.files[0];
   if (!file) return;
-  try {
-    const data = JSON.parse(await file.text());
-    $("#t-blocks").innerHTML = "";
-    data.forEach((b) => addBlock(b));
-    setStatus("#t-status", "Scena importata ✓", "ok");
-  } catch { setStatus("#t-status", "File scena non valido", "err"); }
+  const raw = await file.text();
+  let data;
+  try { data = JSON.parse(raw); }          // JSON esportato
+  catch { data = parseSceneText(raw); }    // fallback: testo umano .txt/.md
+  if (!Array.isArray(data) || !data.length) {
+    setStatus("#t-status", "File scena non valido", "err"); e.target.value = ""; return;
+  }
+  $("#t-blocks").innerHTML = "";
+  data.forEach((b) => addBlock(b));
+  const known = new Set(voicesCache.map((v) => v.id));
+  const unknown = [...new Set(data.filter((b) => b.voice_id && !known.has(b.voice_id)).map((b) => b.voice_id))];
+  const noChar = data.filter((b) => !b.character).length;
+  const warn = [
+    unknown.length && `voci sconosciute: ${unknown.join(", ")}`,
+    noChar && `${noChar} battute senza Personaggio`,
+  ].filter(Boolean).join(" — ");
+  setStatus("#t-status", warn ? `Scena importata — ${warn}` : "Scena importata ✓", warn ? "err" : "ok");
   e.target.value = "";
 };
 // ponytail: persistenza via export/import file; niente DB/localStorage finché basta.

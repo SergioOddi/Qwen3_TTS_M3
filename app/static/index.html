@@ -70,12 +70,12 @@
       <div class="row" style="margin-top:.75rem">
         <button id="t-add">+ Aggiungi battuta</button>
         <button id="t-export">⬇ Esporta scena</button>
-        <button id="t-import-btn">⬆ Importa scena</button>
-        <input id="t-import" type="file" accept="application/json" class="hidden">
+        <button id="t-import-btn" title="JSON esportato, oppure .txt/.md con battute separate da una riga '---'">⬆ Importa scena</button>
+        <input id="t-import" type="file" accept=".json,.txt,.md,application/json,text/plain,text/markdown" class="hidden">
       </div>
       <button id="t-run" class="primary">Genera scena</button>
       <div id="t-status" class="status"></div>
-      <progress id="t-progress" class="hidden" max="100" value="0"></progress>
+      <progress id="t-progress" class="hidden"></progress>
       <label class="hidden" id="t-scene-label">Scena completa</label>
       <audio id="t-scene" controls class="hidden"></audio>
       <a id="t-download" class="hidden" download>⬇ Scarica scena</a>
@@ -105,7 +105,7 @@
           <button class="t-regen" title="Rigenera solo questa battuta">↻ Rigenera</button>
           <button class="t-del" title="Elimina">✕</button>
         </div>
-        <progress class="t-prog hidden" max="100" value="0"></progress>
+        <progress class="t-prog hidden"></progress>
         <audio class="t-clip hidden" controls></audio>
       </div>
     </template>
@@ -168,6 +168,7 @@
     </section>
   </main>
 
+  <script src="/scene_parse.js"></script>
   <script src="/app.js"></script>
 </body>
 </html>
