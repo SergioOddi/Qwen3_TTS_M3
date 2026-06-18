@@ -255,9 +255,10 @@ function blockToApi(b) {
 
 $("#t-add").onclick = () => addBlock();
 
+// Genera (o rigenera) il clip di un singolo blocco. Ritorna true se ok.
 async function regenBlock(div) {
   const b = readBlock(div);
-  if (!b.text) { setStatus("#t-status", "Battuta vuota", "err"); return; }
+  if (!b.text) { setStatus("#t-status", "Battuta vuota", "err"); return false; }
   setStatus("#t-status", "Rigenero battuta…", "");
   const clip = div.querySelector(".t-clip");
   const prog = div.querySelector(".t-prog");
@@ -270,21 +271,36 @@ async function regenBlock(div) {
                            speed: b.speed, emotion: b.emotion,
                            instruct: b.instruct || null }),
   });
-  if (!r.ok) { prog.classList.add("hidden"); setStatus("#t-status", "Errore: " + (await r.text()), "err"); return; }
+  if (!r.ok) { prog.classList.add("hidden"); setStatus("#t-status", "Errore: " + (await r.text()), "err"); return false; }
   const { job_id } = await r.json();
   const job = await pollJob(job_id);
-  if (job.status === "error") { prog.classList.add("hidden"); setStatus("#t-status", "Errore: " + job.error, "err"); return; }
+  if (job.status === "error") { prog.classList.add("hidden"); setStatus("#t-status", "Errore: " + job.error, "err"); return false; }
   prog.classList.add("hidden");
   clip.src = "/api/outputs/" + job.result.split("/").pop();
   clip.classList.remove("hidden");
   setStatus("#t-status", "Battuta pronta ✓", "ok");
+  return true;
 }
 
-$("#t-run").onclick = async () => {
+// 🎬 All-in-one: genera ogni battuta da zero, poi unisce nella scena.
+$("#t-genall").onclick = async () => {
+  const divs = [...$$("#t-blocks .t-block")].filter((d) => readBlock(d).text);
+  if (!divs.length) { setStatus("#t-status", "Nessuna battuta", "err"); return; }
+  for (let i = 0; i < divs.length; i++) {
+    setStatus("#t-status", `Genero battuta ${i + 1}/${divs.length}…`, "");
+    if (!await regenBlock(divs[i])) return;   // stop al primo errore (status già impostato)
+  }
+  await stitchScene();
+};
+
+$("#t-run").onclick = stitchScene;
+
+// Unisce nella scena SOLO i clip già generati per ogni battuta.
+async function stitchScene() {
   const blocks = [...$$("#t-blocks .t-block")].map(readBlock).filter((b) => b.text);
   if (!blocks.length) { setStatus("#t-status", "Nessuna battuta", "err"); return; }
   const missing = blocks.filter((b) => !b.clip).length;
-  if (missing) { setStatus("#t-status", `Genera prima le ${missing} battute mancanti con ↻ Rigenera`, "err"); return; }
+  if (missing) { setStatus("#t-status", `Genera prima le ${missing} battute mancanti (↻ Rigenera o 🎬 Genera scena completa)`, "err"); return; }
   setStatus("#t-status", "Unisco le battute…", "");
   $("#t-scene").classList.add("hidden"); $("#t-download").classList.add("hidden");
   const prog = $("#t-progress");

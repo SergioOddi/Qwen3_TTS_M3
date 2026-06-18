@@ -31,6 +31,7 @@ button {
   border-radius: 8px; padding: .55rem 1rem; cursor: pointer; font-size: .9rem;
 }
 button.primary { background: var(--accent); border-color: var(--accent); color: #fff; margin-top: 1rem; }
+button.genall { background: #a8e6cf; border-color: #a8e6cf; color: #0f1115; font-weight: 600; margin-top: 1rem; }
 button:hover { filter: brightness(1.1); }
 .status { margin: .75rem 0; color: var(--muted); min-height: 1.2em; }
 .status.ok { color: var(--ok); } .status.err { color: var(--err); }
