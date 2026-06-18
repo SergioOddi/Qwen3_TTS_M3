@@ -7,12 +7,10 @@ from tests.conftest import _write
 
 
 class FakeMM:
-    def generate_design(self, text, language, voice_description):
+    def generate_design(self, text, language, voice_description, temperature=None):
         return np.zeros(2400, dtype="float32"), 24000
     def generate_clone(self, **kw):
         return np.zeros(2400, dtype="float32"), 24000
-    def status(self):
-        return {"design_loaded": False, "base_loaded": False}
 
 
 def _client(tmp_dirs):
@@ -49,6 +47,35 @@ def test_generate_empty_text_400(tmp_dirs):
     r = _client(tmp_dirs).post("/api/generate",
                                json={"text": "", "voice_id": "narr"})
     assert r.status_code == 400
+
+
+def _poll(client, jid):
+    import time
+    for _ in range(100):
+        job = client.get(f"/api/jobs/{jid}").json()
+        if job["status"] in ("done", "error"):
+            return job
+        time.sleep(0.02)
+    return job
+
+
+def test_teatro_reuses_clip_no_regen(tmp_dirs, monkeypatch):
+    """Se il blocco ha un clip già generato, /api/teatro lo riusa: nessuna
+    nuova generazione TTS (altrimenti aggiunge casualità non controllabile)."""
+    _write(tmp_dirs["config"], "narr", {"language": "Italian", "voice_description": "x"})
+    sf.write(tmp_dirs["output"] / "battuta0.wav", np.zeros(2400, dtype="float32"), 24000)
+
+    from app import pipeline
+    def boom(*a, **k):
+        raise AssertionError("run_generation non deve essere chiamato sul clip riusato")
+    monkeypatch.setattr(pipeline, "run_generation", boom)
+
+    client = _client(tmp_dirs)
+    r = client.post("/api/teatro", json={"title": "scena", "format": "wav",
+        "blocks": [{"voice_id": "narr", "text": "ciao", "clip": "battuta0.wav"}]})
+    assert r.status_code == 200
+    job = _poll(client, r.json()["job_id"])
+    assert job["status"] == "done", job
 
 
 def test_create_clone_endpoint(tmp_dirs):

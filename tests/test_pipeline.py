@@ -8,12 +8,12 @@ class FakeMM:
     def __init__(self):
         self.calls = []
 
-    def generate_design(self, text, language, voice_description):
+    def generate_design(self, text, language, voice_description, temperature=None):
         self.calls.append(("design", text))
         return np.zeros(2400, dtype="float32"), 24000
 
     def generate_clone(self, text, language, ref_audio, ref_text,
-                       instruct=None, speed_factor=1.0):
+                       speed_factor=1.0, temperature=None):
         self.calls.append(("clone", text))
         return np.zeros(2400, dtype="float32"), 24000
 

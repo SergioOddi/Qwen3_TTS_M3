@@ -2,7 +2,27 @@
   "permissions": {
     "allow": [
       "Bash(conda run:*)",
-      "Bash(ffprobe -v quiet -show_entries format=duration -of csv=p=0 \"/Users/sergiooddi/Claude-Code/GitHUB repos/TTS_M3/docs/CLONAGGIO/INPUT_VOCE_da_CLONARE/dudu02.m4a\")"
+      "Bash(ffprobe -v quiet -show_entries format=duration -of csv=p=0 \"/Users/sergiooddi/Claude-Code/GitHUB repos/TTS_M3/docs/CLONAGGIO/INPUT_VOCE_da_CLONARE/dudu02.m4a\")",
+      "Bash(.venv/bin/pytest *)",
+      "Bash(.venv/bin/uvicorn *)",
+      "Bash(.venv/bin/pip list*)",
+      "Bash(.venv/bin/pip show *)",
+      "Bash(curl * http://127.0.0.1:*)",
+      "Bash(curl * http://localhost:*)",
+      "Bash(pkill -f *)",
+      "Bash(conda env *)",
+      "Bash(lsof -ti:8000)",
+      "Bash(xargs -r kill)",
+      "Bash(uvicorn app.main:get_app --factory --host 127.0.0.1 --port 8000)",
+      "Bash(curl -s -o /dev/null -w \"UI %{http_code}\\\\n\" http://127.0.0.1:8000/)",
+      "Bash(curl -s -o /dev/null -w \"voices %{http_code}\\\\n\" http://127.0.0.1:8000/api/voices)",
+      "Bash(curl -s http://127.0.0.1:8000/api/voices)",
+      "Bash(curl -s -X POST http://127.0.0.1:8000/api/teatro -H 'Content-Type: application/json' -d '{ *)",
+      "Read(//Library/Frameworks/Python.framework/Versions/3.12/bin/**)",
+      "Bash(.venv/bin/python -c \"import torch,qwen_tts,fastapi,librosa,soundfile; print\\('venv deps OK', torch.__version__\\)\")",
+      "Bash(curl -s -o /dev/null -w \"UI %{http_code} voices \" http://127.0.0.1:8000/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://127.0.0.1:8000/api/voices)",
+      "Bash(.venv/bin/python -c ' *)"
     ],
     "additionalDirectories": [
       "/Users/sergiooddi/Claude-Code/GitHUB repos/TTS_M3/docs/CLONAGGIO/INPUT_VOCE_da_CLONARE"

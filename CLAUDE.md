@@ -29,6 +29,75 @@ TTS_M3/
 └── models/          # Cache modelli scaricati (opzionale)
 ```
 
+## App Standalone GASSMANN
+
+Web app (FastAPI + single-page UI) per clonare voci e generare TTS dal browser.
+Nome utente-facing: **GASSMANN** (il sistema TTS sottostante resta Qwen3-TTS).
+
+**Avvio:**
+```bash
+uvicorn app.main:create_app --factory --host 127.0.0.1 --port 8000
+# UI su http://127.0.0.1:8000
+```
+
+**Struttura:** `app/main.py` (API + serve `app/static/`), `app/pipeline.py`
+(generazione + `stitch_scene`), `app/jobs.py` (coda async in-memory), `app/voices.py`
+(CRUD voci da `config/*.json`), `app/model_manager.py` (lazy-load modelli),
+`app/transcribe.py` (audio→ref_text).
+
+**Tab UI:** Genera (singolo) · Batch (più testi, stessa voce) · **Teatro** · Voci.
+
+**Endpoint principali:**
+- `GET /api/voices` · `POST /api/voices` (crea clone) · `GET /api/voices/{id}/sample`
+- `POST /api/voices/{id}/emotion` (aggiunge variante emotiva: campione + ref_text)
+- `POST /api/transcribe`
+- `POST /api/generate` → `{job_id}` (campi: text, voice_id, format, biochem, speed, emotion, instruct, temperature)
+- `POST /api/batch` → `{job_id}`
+- `POST /api/teatro` → `{job_id}`
+- `GET /api/jobs/{jid}` (polling: queued/running/done/error)
+- `GET /api/outputs` · `GET /api/outputs/{filename}`
+
+### Funzione TEATRO
+
+Compone una **scena** come sequenza di *speaker block* (battute). Scopo: provare e
+imparare le battute di un monologo o dialogo a più voci alternate.
+
+**Campi di ogni speaker block:**
+- `character` — etichetta personaggio (solo visuale)
+- `voice_id` — voce (dropdown da `/api/voices`); le **varianti emotive** appaiono come
+  voci separate (`Sergio · triste`), value `id|emozione` → `emotion` derivata dal menu
+- `speed` — velocità: 0.8 / 0.9 / 1.0 / 1.1 / 1.2 (via librosa time-stretch)
+- `instruct` — istruzione libera, **solo voci design** (il modello clone la ignora)
+- `text` — la battuta
+- `pause_after` — secondi di silenzio dopo la battuta nella scena
+- Azioni per blocco: su / giù / duplica / elimina / **rigenera** (riusa `/api/generate`)
+
+**IMPORTANTE — emozioni e limite del modello:** il modello Base (voci clonate,
+`generate_voice_clone`) **non** supporta `instruct`: l'emozione da testo funziona solo
+sul modello VoiceDesign. Su voci clonate l'emozione si ottiene con una **cascata** in
+`pipeline.run_generation`:
+1. **Campione emotivo** (qualità reale): se la voce ha un `emotion_samples[emotion]`
+   nel config, usa quel `ref_audio` (+ relativo `ref_text`) → il clone copia la prosodia.
+   Si carica da UI (Voci → "Variante emotiva") o via `POST /api/voices/{id}/emotion`.
+2. **DSP fallback** (`apply_emotion_dsp`, euristico): se non c'è campione, applica
+   pitch+tempo+gain (`EMOTION_DSP` in `pipeline.py`) — approssima, meno naturale.
+- `temperature` → `do_sample`+sampling, alza la vivacità (non direziona l'emozione).
+- Per le voci **design** l'emozione passa invece come frase `instruct`
+  (`EMOTION_PHRASES` in `pipeline.py`) combinata con `voice_description` + istruzione libera.
+
+Config voce con varianti emotive (esempio):
+```json
+{ "mode": "voice_clone", "ref_text": "…",
+  "emotion_samples": { "felice": "VOICE_SAMPLES/gazzolo_felice.wav" },
+  "emotion_ref_texts": { "felice": "trascrizione del campione felice" } }
+```
+
+**Output:** `pipeline.stitch_scene` concatena i clip in una traccia unica (con le pause)
++ restituisce i clip singoli. Le scene si esportano/importano come JSON (impostazioni +
+testi, no audio) dalla UI.
+
+**Test:** `python -m app.tests.test_stitch` (stitch) · `python -m app.tests.test_emotion` (DSP).
+
 ## Setup Ambiente
 
 ### Installazione Dipendenze

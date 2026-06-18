@@ -3,15 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TTS_M3 — Studio Voce</title>
+  <title>GASSMANN — Studio Voce</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
   <header>
-    <h1>🎙️ TTS_M3 — Studio Voce</h1>
+    <h1>🎙️ GASSMANN — Studio Voce</h1>
     <nav>
       <button class="tab active" data-tab="genera">Genera</button>
       <button class="tab" data-tab="batch">Batch</button>
+      <button class="tab" data-tab="teatro">Teatro</button>
       <button class="tab" data-tab="voci">Voci</button>
     </nav>
   </header>
@@ -58,9 +59,64 @@
       <ul id="b-results"></ul>
     </section>
 
+    <!-- TEATRO -->
+    <section id="teatro" class="panel">
+      <p>Componi una scena: ogni blocco è una battuta con la sua voce e velocità. Per l'emozione scegli la variante della voce nel menu (es. <code>Sergio · triste</code>). L'output è una traccia unica + i clip singoli.</p>
+      <div class="row">
+        <div><label>Nome scena</label><input id="t-title" type="text" value="scena"></div>
+        <div><label>Formato</label><select id="t-format"><option>wav</option><option>mp3</option></select></div>
+      </div>
+      <div id="t-blocks"></div>
+      <div class="row" style="margin-top:.75rem">
+        <button id="t-add">+ Aggiungi battuta</button>
+        <button id="t-export">⬇ Esporta scena</button>
+        <button id="t-import-btn">⬆ Importa scena</button>
+        <input id="t-import" type="file" accept="application/json" class="hidden">
+      </div>
+      <button id="t-run" class="primary">Genera scena</button>
+      <div id="t-status" class="status"></div>
+      <progress id="t-progress" class="hidden" max="100" value="0"></progress>
+      <label class="hidden" id="t-scene-label">Scena completa</label>
+      <audio id="t-scene" controls class="hidden"></audio>
+      <a id="t-download" class="hidden" download>⬇ Scarica scena</a>
+    </section>
+
+    <!-- template blocco teatro (clonato da app.js) -->
+    <template id="t-block-tpl">
+      <div class="t-block">
+        <div class="row">
+          <div><label>Personaggio</label><input class="t-char" type="text" placeholder="es. AMLETO"></div>
+          <div><label>Voce</label><select class="t-voice"></select></div>
+          <div><label>Velocità</label><select class="t-speed">
+            <option value="0.8">0.8×</option><option value="0.9">0.9×</option>
+            <option value="1.0" selected>1.0×</option>
+            <option value="1.1">1.1×</option><option value="1.2">1.2×</option>
+          </select></div>
+          <div><label>Pausa dopo (sec)</label><input class="t-pause" type="number" min="0" step="0.1" value="0.5"></div>
+        </div>
+        <label>Istruzione libera <small>(solo voci design)</small></label>
+        <input class="t-instruct" type="text" placeholder="es. sussurrando">
+        <label>Battuta</label>
+        <textarea class="t-text" rows="2" placeholder="testo della battuta…"></textarea>
+        <div class="row t-block-actions">
+          <button class="t-up" title="Su">↑</button>
+          <button class="t-down" title="Giù">↓</button>
+          <button class="t-dup" title="Duplica">⧉</button>
+          <button class="t-regen" title="Rigenera solo questa battuta">↻ Rigenera</button>
+          <button class="t-del" title="Elimina">✕</button>
+        </div>
+        <progress class="t-prog hidden" max="100" value="0"></progress>
+        <audio class="t-clip hidden" controls></audio>
+      </div>
+    </template>
+
     <!-- VOCI -->
     <section id="voci" class="panel">
       <h2>Libreria voci</h2>
+      <div class="row" style="margin-bottom:.5rem">
+        <button id="v-import-btn">⬆ Importa voce</button>
+        <input id="v-import" type="file" accept="application/json,.json" class="hidden">
+      </div>
       <div id="v-list" class="cards"></div>
       <h2>Nuova voce clonata</h2>
       <div class="form">
@@ -86,6 +142,28 @@
         <input id="v-tags" type="text" placeholder="docente, narratore">
         <button id="v-save" class="primary">Salva voce</button>
         <div id="v-status" class="status"></div>
+      </div>
+
+      <h2>Variante emotiva (voce esistente)</h2>
+      <p>Carica uno spezzone in cui la voce esprime l'emozione: il clone ne copia la prosodia. È il modo più credibile per le emozioni.</p>
+      <div class="form">
+        <div class="row">
+          <div><label>Voce</label><select id="e-voice"></select></div>
+          <div><label>Emozione</label><select id="e-emotion">
+            <option value="felice">felice</option><option value="triste">triste</option>
+            <option value="arrabbiato">arrabbiato</option><option value="impaurito">impaurito</option>
+            <option value="sorpreso">sorpreso</option><option value="ironico">ironico</option>
+            <option value="calmo">calmo</option>
+          </select></div>
+        </div>
+        <label>Campione audio (file)</label>
+        <input id="e-file" type="file" accept="audio/*">
+        <audio id="e-sample" controls class="hidden"></audio>
+        <label>Trascrizione (ref_text)</label>
+        <textarea id="e-reftext" rows="2" placeholder="Scrivi a mano o usa Trascrivi…"></textarea>
+        <button id="e-transcribe">Trascrivi automaticamente</button>
+        <button id="e-save" class="primary">Salva variante</button>
+        <div id="e-status" class="status"></div>
       </div>
     </section>
   </main>
