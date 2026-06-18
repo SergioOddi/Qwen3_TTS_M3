@@ -329,8 +329,8 @@ $("#t-import").onchange = async (e) => {
   if (!file) return;
   const raw = await file.text();
   let data;
-  try { data = JSON.parse(raw); }          // JSON esportato
-  catch { data = parseSceneText(raw); }    // fallback: testo umano .txt/.md
+  try { data = JSON.parse(raw); }      // JSON esportato
+  catch { data = parseScene(raw); }    // fallback: testo .txt/.md (campi o copione)
   if (!Array.isArray(data) || !data.length) {
     setStatus("#t-status", "File scena non valido", "err"); e.target.value = ""; return;
   }

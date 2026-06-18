@@ -1,6 +1,6 @@
 // node app/static/scene_parse.test.mjs
 import { createRequire } from "module";
-const { parseSceneText } = createRequire(import.meta.url)("./scene_parse.js");
+const { parseScene, parseSceneText, parseScreenplay } = createRequire(import.meta.url)("./scene_parse.js");
 import assert from "assert";
 
 const txt = `Personaggio: Otello
@@ -36,4 +36,26 @@ assert.equal(c.character, "");                      // Personaggio mancante: non
 assert.equal(c.text, "Una voce dal fondo.");
 assert.equal(parseSceneText("\n\n").length, 0);     // nessuna Battuta → niente blocchi
 assert.equal(parseSceneText("Personaggio: Solo\nvoce: gazzolo").length, 0);  // senza Battuta → scartato
+
+// --- formato COPIONE (screenplay) ---
+const copione = `**ELLIDA** *(si toglie il cappuccio)* Ritornavo spesso *(entra Lida)*
+
+*Lyngstrand monta il cavalletto. Indossa una giacca di velluto.*
+
+**LIDA** *(si gira)* Oh, Lyngstrand! È dunque ritornato?
+
+**LYNGSTRAND** Niente di serio, come un'oppressione quando respiro *... (si tocca il* *petto)*
+
+*Entra Wangel.*`;
+
+const sc = parseScene(copione);
+assert.deepEqual(sc, parseScreenplay(copione));     // auto-rileva il copione
+assert.equal(sc.length, 3);                         // 3 battute; 2 didascalie sole saltate
+assert.equal(sc[0].character, "ELLIDA");
+assert.equal(sc[0].text, "Ritornavo spesso");       // corsivo (didascalia) rimosso
+assert.equal(sc[0].voice_id, "");                   // voce vuota → la assegni nell'app
+assert.equal(sc[1].character, "LIDA");
+assert.equal(sc[1].text, "Oh, Lyngstrand! È dunque ritornato?");
+assert.equal(sc[2].text, "Niente di serio, come un'oppressione quando respiro");  // didascalia spezzata via
+assert.equal(parseScene("Personaggio: X\nBattuta: ciao")[0].text, "ciao");  // senza ** → formato campi
 console.log("ok");
