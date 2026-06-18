@@ -142,10 +142,11 @@ function updateGenPreview() {
 $("#g-voice").onchange = updateGenPreview;
 
 // --- Polling job ---
-async function pollJob(jid) {
+async function pollJob(jid, shouldStop) {
   while (true) {
     const job = await (await fetch(`/api/jobs/${jid}`)).json();
     if (job.status === "done" || job.status === "error") return job;
+    if (shouldStop && shouldStop()) return { status: "aborted" };  // smette di pollare
     await new Promise((r) => setTimeout(r, 400));
   }
 }
@@ -256,7 +257,7 @@ function blockToApi(b) {
 $("#t-add").onclick = () => addBlock();
 
 // Genera (o rigenera) il clip di un singolo blocco. Ritorna true se ok.
-async function regenBlock(div) {
+async function regenBlock(div, shouldStop) {
   const b = readBlock(div);
   if (!b.text) { setStatus("#t-status", "Battuta vuota", "err"); return false; }
   setStatus("#t-status", "Rigenero battuta…", "");
@@ -273,8 +274,13 @@ async function regenBlock(div) {
   });
   if (!r.ok) { prog.classList.add("hidden"); setStatus("#t-status", "Errore: " + (await r.text()), "err"); return false; }
   const { job_id } = await r.json();
-  const job = await pollJob(job_id);
-  if (job.status === "error") { prog.classList.add("hidden"); setStatus("#t-status", "Errore: " + job.error, "err"); return false; }
+  const job = await pollJob(job_id, shouldStop);
+  if (job.status !== "done") {
+    prog.classList.add("hidden");
+    setStatus("#t-status", job.status === "aborted" ? "Interrotto ⏹" : "Errore: " + job.error,
+      job.status === "aborted" ? "" : "err");
+    return false;
+  }
   prog.classList.add("hidden");
   clip.src = "/api/outputs/" + job.result.split("/").pop();
   clip.classList.remove("hidden");
@@ -283,14 +289,29 @@ async function regenBlock(div) {
 }
 
 // 🎬 All-in-one: genera ogni battuta da zero, poi unisce nella scena.
+// ponytail: stop lato client (ferma coda + polling). La battuta già in volo
+// finisce sul server: il backend non espone una cancellazione.
+let stopScene = false;
+$("#t-stop").onclick = () => { stopScene = true; setStatus("#t-status", "Interruzione…", ""); };
 $("#t-genall").onclick = async () => {
   const divs = [...$$("#t-blocks .t-block")].filter((d) => readBlock(d).text);
   if (!divs.length) { setStatus("#t-status", "Nessuna battuta", "err"); return; }
-  for (let i = 0; i < divs.length; i++) {
-    setStatus("#t-status", `Genero battuta ${i + 1}/${divs.length}…`, "");
-    if (!await regenBlock(divs[i])) return;   // stop al primo errore (status già impostato)
+  stopScene = false;
+  const prog = $("#t-progress");
+  $("#t-scene").classList.add("hidden"); $("#t-download").classList.add("hidden");
+  prog.classList.remove("hidden");          // barra globale visibile per tutto il 🎬
+  $("#t-stop").classList.remove("hidden"); $("#t-genall").disabled = true;
+  try {
+    for (let i = 0; i < divs.length; i++) {
+      if (stopScene) { setStatus("#t-status", "Interrotto ⏹", ""); return; }
+      setStatus("#t-status", `Genero battuta ${i + 1}/${divs.length}…`, "");
+      if (!await regenBlock(divs[i], () => stopScene)) return;  // stop o errore (status già impostato)
+    }
+    await stitchScene();                     // tiene la barra e la nasconde a fine unione
+  } finally {
+    prog.classList.add("hidden");
+    $("#t-stop").classList.add("hidden"); $("#t-genall").disabled = false;
   }
-  await stitchScene();
 };
 
 $("#t-run").onclick = stitchScene;

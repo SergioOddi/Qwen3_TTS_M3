@@ -32,6 +32,8 @@ button {
 }
 button.primary { background: var(--accent); border-color: var(--accent); color: #fff; margin-top: 1rem; }
 button.genall { background: #a8e6cf; border-color: #a8e6cf; color: #0f1115; font-weight: 600; margin-top: 1rem; }
+button.stop { background: var(--err); border-color: var(--err); color: #fff; font-weight: 600; margin-top: 1rem; }
+button:disabled { opacity: .5; cursor: not-allowed; }
 button:hover { filter: brightness(1.1); }
 .status { margin: .75rem 0; color: var(--muted); min-height: 1.2em; }
 .status.ok { color: var(--ok); } .status.err { color: var(--err); }
