@@ -49,7 +49,7 @@ python -m app.desktop                                               # finestra d
 `app/transcribe.py` (audio→ref_text), `app/desktop.py` (wrapper pywebview),
 `app/biochem_text_preprocessor.py` (preprocessing termini scientifici).
 
-**Tab UI:** Genera (singolo) · Batch (più testi, stessa voce) · **Teatro** · Voci.
+**Tab UI:** Genera (singolo) · Batch (più testi, stessa voce) · **Teatro** (voci clone, neutre) · **Teatro-Emozioni** (voci design, Sesso→Voce→Emozione) · Voci.
 
 **Endpoint principali:**
 - `GET /api/voices` · `POST /api/voices` (crea clone) · `GET /api/voices/{id}/sample`
@@ -322,6 +322,15 @@ sf.write("output.wav", wavs[0], sr)
   clonabile (solo preset), nessuno speaker IT nativo (solo EN `Ryan`/`Aiden` cross-lingual).
   Stimato ~30 righe in `pipeline.py` + dropdown speaker nel Teatro. Rimandato: sistema
   attuale funziona, rischio risultato mediocre per l'italiano.
+- [ ] **Valutare Chatterbox Multilingual (Resemble AI)** come engine alternativo per
+  emozione: 0.5B, 23 lingue (IT incluso), **manopola emozione esplicita** `exaggeration`
+  0.25–2.0 (neutro 0.5) — controllo diretto che Qwen3-TTS non ha sui clone. Clone
+  zero-shot. Rischi: MPS su Mac segnalato instabile (test "CPU lento / MPS buggy" vs
+  Resemble dichiara supporto pieno) → **verificare sul M3**; integrazione = nuovo engine
+  (dep `chatterbox` + path in `model_manager.py` + ref format diverso), ~mezza giornata.
+  **Mossa prima di integrare**: smoke test standalone (1 battuta IT "arrabbiata") per
+  giudicare qualità + velocità. Piano B se MPS scarso: CosyVoice3-MLX (Mac-nativo,
+  sub-realtime, emozione a tag, IT incerto). Rif: resemble.ai/chatterbox.
 
 ## Guide Pratiche
 
