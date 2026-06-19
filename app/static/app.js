@@ -25,6 +25,16 @@ const parseVoice = (val) => {
   return i < 0 ? { voice_id: val, emotion: null }
                : { voice_id: val.slice(0, i), emotion: val.slice(i + 1) };
 };
+// Teatro: solo voci clone, neutre (niente varianti emotive nel menu)
+const cloneVoiceOptions = () => voicesCache.filter((v) => v.type === "clone")
+  .map((v) => `<option value="${esc(v.id)}">${esc(v.id)}</option>`).join("");
+// Teatro-Emozioni: voci design filtrate per sesso
+const designVoicesByGender = (g) =>
+  voicesCache.filter((v) => v.type === "design" && v.gender === g);
+// ponytail: lista emozioni hardcoded (come la select "Variante emotiva" in index.html);
+// l'unica fonte canonica è SELECTABLE_EMOTIONS in voices.py.
+const EMOTIONS = ["felice", "triste", "arrabbiato", "impaurito",
+                  "sorpreso", "ironico", "calmo"];
 async function loadVoices() {
   const r = await fetch("/api/voices");
   voicesCache = await r.json();
@@ -32,12 +42,10 @@ async function loadVoices() {
   for (const sel of ["#g-voice", "#b-voice"]) $(sel).innerHTML = voiceOptions();
   $("#e-voice").innerHTML = voicesCache.filter((v) => v.type === "clone")
     .map((v) => `<option value="${esc(v.id)}">${esc(v.id)}${v.emotions.length ? " ["+v.emotions.join(",")+"]" : ""}</option>`).join("");
-  $$("#t-blocks .t-voice").forEach((sel) => {
-    const cur = sel.value; sel.innerHTML = voiceOptions(); sel.value = cur;
-  });
+  teatro.repopulateVoices();
+  teatroEmo.repopulateVoices();
   renderVoiceCards();
   updateGenPreview();
-  if (!$("#t-blocks").children.length) addBlock();
 }
 
 function renderVoiceCards() {
@@ -211,179 +219,231 @@ $("#b-run").onclick = async () => {
   setStatus("#b-status", "Batch completato ✓", "ok");
 };
 
-// --- Teatro ---
-function addBlock(data = {}) {
-  const tpl = $("#t-block-tpl").content.firstElementChild.cloneNode(true);
-  tpl.querySelector(".t-voice").innerHTML = voiceOptions();
-  if (data.voice_id)
-    tpl.querySelector(".t-voice").value =
-      data.emotion ? `${data.voice_id}|${data.emotion}` : data.voice_id;
-  if (data.character != null) tpl.querySelector(".t-char").value = data.character;
-  if (data.speed != null) tpl.querySelector(".t-speed").value = String(data.speed);
-  if (data.instruct != null) tpl.querySelector(".t-instruct").value = data.instruct;
-  if (data.pause_after != null) tpl.querySelector(".t-pause").value = data.pause_after;
-  if (data.text != null) tpl.querySelector(".t-text").value = data.text;
-  tpl.querySelector(".t-del").onclick = () => tpl.remove();
-  tpl.querySelector(".t-dup").onclick = () => tpl.after(addBlock(readBlock(tpl)));
-  tpl.querySelector(".t-up").onclick = () => tpl.previousElementSibling?.before(tpl);
-  tpl.querySelector(".t-down").onclick = () => tpl.nextElementSibling?.after(tpl);
-  tpl.querySelector(".t-regen").onclick = () => regenBlock(tpl);
-  $("#t-blocks").appendChild(tpl);
-  return tpl;
-}
+// --- Teatro (factory condivisa tra Teatro e Teatro-Emozioni) ---
+// I due tab differiscono solo per i controlli voce (fillVoiceUI/readVoice);
+// generazione, stitch, export/import e azioni blocco sono identici.
+function makeTeatro({ prefix, fillVoiceUI, readVoice }) {
+  const P = (s) => $(`#${prefix}-${s}`);
+  const cls = (el, s) => el.querySelector(`.${prefix}-${s}`);
+  const tpl = $(`#${prefix}-block-tpl`);
+  let stopScene = false;  // per-istanza: niente collisione tra i due tab
 
-function readBlock(div) {
-  const { voice_id, emotion } = parseVoice(div.querySelector(".t-voice").value);
-  const clipEl = div.querySelector(".t-clip");
-  const clip = clipEl && !clipEl.classList.contains("hidden") && clipEl.src
-    ? clipEl.src.split("/").pop() : null;
-  return {
-    character: div.querySelector(".t-char").value.trim(),
-    voice_id, emotion,
-    speed: parseFloat(div.querySelector(".t-speed").value),
-    instruct: div.querySelector(".t-instruct").value.trim(),
-    pause_after: parseFloat(div.querySelector(".t-pause").value) || 0,
-    text: div.querySelector(".t-text").value.trim(),
-    clip,
-  };
-}
-
-function blockToApi(b) {
-  return { character: b.character, voice_id: b.voice_id, text: b.text, speed: b.speed,
-           emotion: b.emotion, instruct: b.instruct || null, pause_after: b.pause_after,
-           clip: b.clip || null };
-}
-
-$("#t-add").onclick = () => addBlock();
-
-// Genera (o rigenera) il clip di un singolo blocco. Ritorna true se ok.
-async function regenBlock(div, shouldStop) {
-  const b = readBlock(div);
-  if (!b.text) { setStatus("#t-status", "Battuta vuota", "err"); return false; }
-  setStatus("#t-status", "Rigenero battuta…", "");
-  const clip = div.querySelector(".t-clip");
-  const prog = div.querySelector(".t-prog");
-  clip.classList.add("hidden");
-  prog.classList.remove("hidden");   // indeterminata: il TTS non espone un % reale
-  const r = await fetch("/api/generate", {
-    method: "POST", headers: { "Content-Type": "application/json" },
-    // clip sempre wav: la scena lo riusa per lo stitch (sf.read non legge mp3)
-    body: JSON.stringify({ text: b.text, voice_id: b.voice_id, format: "wav",
-                           speed: b.speed, emotion: b.emotion,
-                           instruct: b.instruct || null }),
-  });
-  if (!r.ok) { prog.classList.add("hidden"); setStatus("#t-status", "Errore: " + (await r.text()), "err"); return false; }
-  const { job_id } = await r.json();
-  const job = await pollJob(job_id, shouldStop);
-  if (job.status !== "done") {
-    prog.classList.add("hidden");
-    setStatus("#t-status", job.status === "aborted" ? "Interrotto ⏹" : "Errore: " + job.error,
-      job.status === "aborted" ? "" : "err");
-    return false;
+  function addBlock(data = {}) {
+    const el = tpl.content.firstElementChild.cloneNode(true);
+    fillVoiceUI(el, data);
+    if (data.character != null) cls(el, "char").value = data.character;
+    if (data.speed != null) cls(el, "speed").value = String(data.speed);
+    if (data.instruct != null) cls(el, "instruct").value = data.instruct;
+    if (data.pause_after != null) cls(el, "pause").value = data.pause_after;
+    if (data.text != null) cls(el, "text").value = data.text;
+    cls(el, "del").onclick = () => el.remove();
+    cls(el, "dup").onclick = () => el.after(addBlock(readBlock(el)));
+    cls(el, "up").onclick = () => el.previousElementSibling?.before(el);
+    cls(el, "down").onclick = () => el.nextElementSibling?.after(el);
+    cls(el, "regen").onclick = () => regenBlock(el);
+    P("blocks").appendChild(el);
+    return el;
   }
-  prog.classList.add("hidden");
-  clip.src = "/api/outputs/" + job.result.split("/").pop();
-  clip.classList.remove("hidden");
-  setStatus("#t-status", "Battuta pronta ✓", "ok");
-  return true;
-}
 
-// 🎬 All-in-one: genera ogni battuta da zero, poi unisce nella scena.
-// ponytail: stop lato client (ferma coda + polling). La battuta già in volo
-// finisce sul server: il backend non espone una cancellazione.
-let stopScene = false;
-$("#t-stop").onclick = () => { stopScene = true; setStatus("#t-status", "Interruzione…", ""); };
-$("#t-genall").onclick = async () => {
-  const divs = [...$$("#t-blocks .t-block")].filter((d) => readBlock(d).text);
-  if (!divs.length) { setStatus("#t-status", "Nessuna battuta", "err"); return; }
-  stopScene = false;
-  const prog = $("#t-progress");
-  $("#t-scene").classList.add("hidden"); $("#t-download").classList.add("hidden");
-  prog.classList.remove("hidden");          // barra globale visibile per tutto il 🎬
-  $("#t-stop").classList.remove("hidden"); $("#t-genall").disabled = true;
-  try {
-    for (let i = 0; i < divs.length; i++) {
-      if (stopScene) { setStatus("#t-status", "Interrotto ⏹", ""); return; }
-      setStatus("#t-status", `Genero battuta ${i + 1}/${divs.length}…`, "");
-      if (!await regenBlock(divs[i], () => stopScene)) return;  // stop o errore (status già impostato)
+  function readBlock(div) {
+    const { voice_id, emotion } = readVoice(div);
+    const clipEl = cls(div, "clip");
+    const clip = clipEl && !clipEl.classList.contains("hidden") && clipEl.src
+      ? clipEl.src.split("/").pop() : null;
+    return {
+      character: cls(div, "char").value.trim(),
+      voice_id, emotion,
+      speed: parseFloat(cls(div, "speed").value),
+      instruct: cls(div, "instruct").value.trim(),
+      pause_after: parseFloat(cls(div, "pause").value) || 0,
+      text: cls(div, "text").value.trim(),
+      clip,
+    };
+  }
+
+  function blockToApi(b) {
+    return { character: b.character, voice_id: b.voice_id, text: b.text, speed: b.speed,
+             emotion: b.emotion, instruct: b.instruct || null, pause_after: b.pause_after,
+             clip: b.clip || null };
+  }
+
+  // Genera (o rigenera) il clip di un singolo blocco. true se ok.
+  async function regenBlock(div, shouldStop) {
+    const b = readBlock(div);
+    if (!b.text) { setStatus(P("status"), "Battuta vuota", "err"); return false; }
+    setStatus(P("status"), "Rigenero battuta…", "");
+    const clip = cls(div, "clip");
+    const prog = cls(div, "prog");
+    clip.classList.add("hidden");
+    prog.classList.remove("hidden");
+    const r = await fetch("/api/generate", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: b.text, voice_id: b.voice_id, format: "wav",
+                             speed: b.speed, emotion: b.emotion,
+                             instruct: b.instruct || null }),
+    });
+    if (!r.ok) { prog.classList.add("hidden"); setStatus(P("status"), "Errore: " + (await r.text()), "err"); return false; }
+    const { job_id } = await r.json();
+    const job = await pollJob(job_id, shouldStop);
+    if (job.status !== "done") {
+      prog.classList.add("hidden");
+      setStatus(P("status"), job.status === "aborted" ? "Interrotto ⏹" : "Errore: " + job.error,
+        job.status === "aborted" ? "" : "err");
+      return false;
     }
-    await stitchScene();                     // tiene la barra e la nasconde a fine unione
-  } finally {
     prog.classList.add("hidden");
-    $("#t-stop").classList.add("hidden"); $("#t-genall").disabled = false;
+    clip.src = "/api/outputs/" + job.result.split("/").pop();
+    clip.classList.remove("hidden");
+    setStatus(P("status"), "Battuta pronta ✓", "ok");
+    return true;
   }
-};
 
-$("#t-run").onclick = stitchScene;
-
-// Unisce nella scena SOLO i clip già generati per ogni battuta.
-async function stitchScene() {
-  const blocks = [...$$("#t-blocks .t-block")].map(readBlock).filter((b) => b.text);
-  if (!blocks.length) { setStatus("#t-status", "Nessuna battuta", "err"); return; }
-  const missing = blocks.filter((b) => !b.clip).length;
-  if (missing) { setStatus("#t-status", `Genera prima le ${missing} battute mancanti (↻ Rigenera o 🎬 Genera scena completa)`, "err"); return; }
-  setStatus("#t-status", "Unisco le battute…", "");
-  $("#t-scene").classList.add("hidden"); $("#t-download").classList.add("hidden");
-  const prog = $("#t-progress");
-  prog.classList.remove("hidden");
-  const r = await fetch("/api/teatro", {
-    method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ blocks: blocks.map(blockToApi),
-                           format: $("#t-format").value, title: $("#t-title").value || "scena" }),
-  });
-  if (!r.ok) { prog.classList.add("hidden"); setStatus("#t-status", "Errore: " + (await r.text()), "err"); return; }
-  const { job_id } = await r.json();
-  const job = await pollJob(job_id);
-  if (job.status === "error") { prog.classList.add("hidden"); setStatus("#t-status", "Errore: " + job.error, "err"); return; }
-  prog.classList.add("hidden");
-  const name = job.result.scene.split("/").pop();   // scena.wav o scena.mp3
-  const url = "/api/outputs/" + name;
-  $("#t-scene-label").classList.remove("hidden");
-  $("#t-scene").src = url; $("#t-scene").classList.remove("hidden");
-  $("#t-download").href = url; $("#t-download").setAttribute("download", name);
-  $("#t-download").classList.remove("hidden");
-  // assegna i clip ai rispettivi blocchi (stesso ordine, esclusi i vuoti)
-  const divs = [...$$("#t-blocks .t-block")].filter((d) => readBlock(d).text);
-  job.result.clips.forEach((c, i) => {
-    const clip = divs[i]?.querySelector(".t-clip");
-    if (clip) { clip.src = "/api/outputs/" + c.path.split("/").pop(); clip.classList.remove("hidden"); }
-  });
-  setStatus("#t-status", "Scena pronta ✓", "ok");
-};
-
-// Export / import scena (impostazioni + testi, no audio)
-$("#t-export").onclick = () => {
-  const data = [...$$("#t-blocks .t-block")].map(readBlock);
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = ($("#t-title").value || "scena") + ".json";
-  a.click();
-};
-$("#t-import-btn").onclick = () => $("#t-import").click();
-$("#t-import").onchange = async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const raw = await file.text();
-  let data;
-  try { data = JSON.parse(raw); }      // JSON esportato
-  catch { data = parseScene(raw); }    // fallback: testo .txt/.md (campi o copione)
-  if (!Array.isArray(data) || !data.length) {
-    setStatus("#t-status", "File scena non valido", "err"); e.target.value = ""; return;
+  async function genAll() {
+    const divs = [...P("blocks").querySelectorAll(`.${prefix}-block`)].filter((d) => readBlock(d).text);
+    if (!divs.length) { setStatus(P("status"), "Nessuna battuta", "err"); return; }
+    stopScene = false;
+    const prog = P("progress");
+    P("scene").classList.add("hidden"); P("download").classList.add("hidden");
+    prog.classList.remove("hidden");
+    P("stop").classList.remove("hidden"); P("genall").disabled = true;
+    try {
+      for (let i = 0; i < divs.length; i++) {
+        if (stopScene) { setStatus(P("status"), "Interrotto ⏹", ""); return; }
+        setStatus(P("status"), `Genero battuta ${i + 1}/${divs.length}…`, "");
+        if (!await regenBlock(divs[i], () => stopScene)) return;
+      }
+      await stitchScene();
+    } finally {
+      prog.classList.add("hidden");
+      P("stop").classList.add("hidden"); P("genall").disabled = false;
+    }
   }
-  $("#t-blocks").innerHTML = "";
-  data.forEach((b) => addBlock(b));
-  const known = new Set(voicesCache.map((v) => v.id));
-  const unknown = [...new Set(data.filter((b) => b.voice_id && !known.has(b.voice_id)).map((b) => b.voice_id))];
-  const noChar = data.filter((b) => !b.character).length;
-  const warn = [
-    unknown.length && `voci sconosciute: ${unknown.join(", ")}`,
-    noChar && `${noChar} battute senza Personaggio`,
-  ].filter(Boolean).join(" — ");
-  setStatus("#t-status", warn ? `Scena importata — ${warn}` : "Scena importata ✓", warn ? "err" : "ok");
-  e.target.value = "";
-};
-// ponytail: persistenza via export/import file; niente DB/localStorage finché basta.
+
+  async function stitchScene() {
+    const blocks = [...P("blocks").querySelectorAll(`.${prefix}-block`)].map(readBlock).filter((b) => b.text);
+    if (!blocks.length) { setStatus(P("status"), "Nessuna battuta", "err"); return; }
+    const missing = blocks.filter((b) => !b.clip).length;
+    if (missing) { setStatus(P("status"), `Genera prima le ${missing} battute mancanti (↻ Rigenera o 🎬 Genera scena completa)`, "err"); return; }
+    setStatus(P("status"), "Unisco le battute…", "");
+    P("scene").classList.add("hidden"); P("download").classList.add("hidden");
+    const prog = P("progress");
+    prog.classList.remove("hidden");
+    const r = await fetch("/api/teatro", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ blocks: blocks.map(blockToApi),
+                             format: P("format").value, title: P("title").value || "scena" }),
+    });
+    if (!r.ok) { prog.classList.add("hidden"); setStatus(P("status"), "Errore: " + (await r.text()), "err"); return; }
+    const { job_id } = await r.json();
+    const job = await pollJob(job_id);
+    if (job.status === "error") { prog.classList.add("hidden"); setStatus(P("status"), "Errore: " + job.error, "err"); return; }
+    prog.classList.add("hidden");
+    const name = job.result.scene.split("/").pop();
+    const url = "/api/outputs/" + name;
+    P("scene-label").classList.remove("hidden");
+    P("scene").src = url; P("scene").classList.remove("hidden");
+    P("download").href = url; P("download").setAttribute("download", name);
+    P("download").classList.remove("hidden");
+    const divs = [...P("blocks").querySelectorAll(`.${prefix}-block`)].filter((d) => readBlock(d).text);
+    job.result.clips.forEach((c, i) => {
+      const clip = divs[i] && cls(divs[i], "clip");
+      if (clip) { clip.src = "/api/outputs/" + c.path.split("/").pop(); clip.classList.remove("hidden"); }
+    });
+    setStatus(P("status"), "Scena pronta ✓", "ok");
+  }
+
+  function repopulateVoices() {
+    P("blocks").querySelectorAll(`.${prefix}-block`).forEach((el) => fillVoiceUI(el, readBlock(el)));
+    if (!P("blocks").children.length) addBlock();
+  }
+
+  // wiring controlli del pannello
+  P("add").onclick = () => addBlock();
+  P("stop").onclick = () => { stopScene = true; setStatus(P("status"), "Interruzione…", ""); };
+  P("genall").onclick = genAll;
+  P("run").onclick = stitchScene;
+  P("export").onclick = () => {
+    const data = [...P("blocks").querySelectorAll(`.${prefix}-block`)].map(readBlock);
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = (P("title").value || "scena") + ".json";
+    a.click();
+  };
+  P("import-btn").onclick = () => P("import").click();
+  P("import").onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const raw = await file.text();
+    let data;
+    try { data = JSON.parse(raw); }
+    catch { data = parseScene(raw); }
+    if (!Array.isArray(data) || !data.length) {
+      setStatus(P("status"), "File scena non valido", "err"); e.target.value = ""; return;
+    }
+    P("blocks").innerHTML = "";
+    data.forEach((b) => addBlock(b));
+    const known = new Set(voicesCache.map((v) => v.id));
+    const unknown = [...new Set(data.filter((b) => b.voice_id && !known.has(b.voice_id)).map((b) => b.voice_id))];
+    const noChar = data.filter((b) => !b.character).length;
+    const warn = [
+      unknown.length && `voci sconosciute: ${unknown.join(", ")}`,
+      noChar && `${noChar} battute senza Personaggio`,
+    ].filter(Boolean).join(" — ");
+    setStatus(P("status"), warn ? `Scena importata — ${warn}` : "Scena importata ✓", warn ? "err" : "ok");
+    e.target.value = "";
+  };
+
+  return { addBlock, repopulateVoices };
+}
+
+// Istanza Teatro: solo voci clone, neutre
+const teatro = makeTeatro({
+  prefix: "t",
+  fillVoiceUI(el, data) {
+    const s = el.querySelector(".t-voice");
+    s.innerHTML = cloneVoiceOptions();
+    if (data.voice_id) s.value = data.voice_id;
+  },
+  readVoice(el) {
+    return { voice_id: el.querySelector(".t-voice").value, emotion: null };
+  },
+});
+
+// Istanza Teatro-Emozioni: voci design + sesso + emozione
+const teatroEmo = makeTeatro({
+  prefix: "te",
+  fillVoiceUI(el, data) {
+    const btnM = el.querySelector(".te-sex-male");
+    const btnF = el.querySelector(".te-sex-female");
+    const voiceSel = el.querySelector(".te-voice");
+    const emoSel = el.querySelector(".te-emotion");
+    let gender = "male";
+    if (data.voice_id) {
+      const v = voicesCache.find((x) => x.id === data.voice_id);
+      if (v && v.gender) gender = v.gender;
+    }
+    const setGender = (g) => {
+      gender = g;
+      btnM.classList.toggle("active", g === "male");
+      btnF.classList.toggle("active", g === "female");
+      voiceSel.innerHTML = designVoicesByGender(g)
+        .map((v) => `<option value="${esc(v.id)}">${esc(v.id)}</option>`).join("");
+    };
+    btnM.onclick = () => setGender("male");
+    btnF.onclick = () => setGender("female");
+    setGender(gender);
+    if (data.voice_id) voiceSel.value = data.voice_id;
+    emoSel.innerHTML = ["neutro", ...EMOTIONS]
+      .map((e) => `<option value="${esc(e)}">${esc(e)}</option>`).join("");
+    if (data.emotion) emoSel.value = data.emotion;
+  },
+  readVoice(el) {
+    const emo = el.querySelector(".te-emotion").value;
+    return { voice_id: el.querySelector(".te-voice").value,
+             emotion: emo === "neutro" ? null : emo };
+  },
+});
 
 // --- Registrazione microfono ---
 let mediaRecorder, chunks = [], recBlob = null, recTimer, recSeconds = 0;
