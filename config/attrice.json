@@ -1,0 +1,8 @@
+{
+  "language": "Italian",
+  "gender": "female",
+  "voice_description": "Voce femminile adulta, teatrale ed espressiva, dizione chiara e ritmo da palcoscenico",
+  "output_format": "wav",
+  "sample_rate": 24000,
+  "voice_notes": "Voce design IT per prove teatrali (emozione nativa via instruct)"
+}

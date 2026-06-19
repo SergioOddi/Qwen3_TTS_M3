@@ -13,6 +13,7 @@ def test_list_voices_separates_design_and_clone(tmp_dirs):
     _write(tmp_dirs["config"], "narratore", {
         "language": "Italian",
         "voice_description": "Voce calda da narratore",
+        "gender": "male",
     })
     _write(tmp_dirs["config"], "zaza_docente", {
         "mode": "voice_clone",
@@ -29,6 +30,14 @@ def test_list_voices_separates_design_and_clone(tmp_dirs):
     assert by_id["zaza_docente"]["type"] == "clone"
     assert "docente" in by_id["zaza_docente"]["tags"]
     assert by_id["narratore"]["language"] == "Italian"
+    # design: emozione nativa via instruct → tutte selezionabili
+    assert by_id["narratore"]["emotions"] == voices.SELECTABLE_EMOTIONS
+    # clone senza emotion_samples → nessuna variante
+    assert by_id["zaza_docente"]["emotions"] == []
+    # design: gender esposto per il filtro M/F del tab Teatro-Emozioni
+    assert by_id["narratore"]["gender"] == "male"
+    # clone senza campo gender → None
+    assert by_id["zaza_docente"]["gender"] is None
 
 
 def test_get_sample_path_resolves_relative(tmp_dirs, monkeypatch):

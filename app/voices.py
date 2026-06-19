@@ -15,6 +15,10 @@ ALLOWED_EMOTIONS = (
     "neutro", "felice", "triste", "arrabbiato",
     "impaurito", "sorpreso", "ironico", "calmo",
 )
+# Emozioni selezionabili (escluso "neutro" = voce base senza istruzione).
+# Le voci design le supportano tutte via instruct (EMOTION_PHRASES in pipeline);
+# le clone solo se hanno il relativo emotion_sample.
+SELECTABLE_EMOTIONS = [e for e in ALLOWED_EMOTIONS if e != "neutro"]
 
 
 def _derive_tags(name: str, data: dict) -> list[str]:
@@ -40,8 +44,11 @@ def _voice_info(path: Path) -> dict | None:
         or data.get("voice_notes")
         or data.get("instruct", ""),
         "tags": _derive_tags(name, data),
+        "gender": data.get("gender"),  # "male" | "female" | None (cloni)
         "sample_path": data.get("prompt_speech_path") if is_clone else None,
-        "emotions": sorted(data.get("emotion_samples", {})) if is_clone else [],
+        # clone: solo emozioni con campione; design: tutte (emozione nativa via instruct)
+        "emotions": sorted(data.get("emotion_samples", {})) if is_clone
+        else list(SELECTABLE_EMOTIONS),
     }
 
 
