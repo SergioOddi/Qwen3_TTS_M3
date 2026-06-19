@@ -1,12 +1,13 @@
 {
   "mode": "voice_clone",
   "language": "Italian",
-  "voice_name": "Tiziana",
+  "voice_name": "Lida",
   "prompt_speech_path": "VOICE_SAMPLES/Tiziana.wav",
   "ref_text": "Benvenuti in un viaggio attraverso i borghi più affascinanti d'Italia! Oggi vi porto con me alla scoperta di Bellagio, sul lago di Como.",
   "output_format": "wav",
   "sample_rate": 24000,
   "speed_factor": 1.0,
   "tags": [],
-  "instruct": "narratrice"
+  "instruct": "narratrice",
+  "voice_notes": ""
 }

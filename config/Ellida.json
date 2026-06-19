@@ -1,0 +1,11 @@
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "voice_name": "Ellida",
+  "prompt_speech_path": "VOICE_SAMPLES/Ellida.wav",
+  "ref_text": "Il coraggio non è assenza di paura, ma semplicemente andare avanti con dignità nonostante la paura.",
+  "output_format": "wav",
+  "sample_rate": 24000,
+  "speed_factor": 1.0,
+  "tags": []
+}
