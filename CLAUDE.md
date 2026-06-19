@@ -23,7 +23,8 @@ TTS_M3/
 ├── OUTPUT/          # File audio generati (.wav/.mp3)
 ├── config/          # File di configurazione per voci e parametri
 ├── VOICE_SAMPLES/   # Campioni audio per voice cloning
-├── src/             # Codice sorgente principale
+├── app/             # Web app GASSMANN (FastAPI + UI + pipeline) — codice principale
+├── tests/           # Suite pytest
 ├── scripts/         # Script di setup e utilità
 ├── docs/            # Documentazione completa (questo file)
 └── models/          # Cache modelli scaricati (opzionale)
@@ -36,14 +37,17 @@ Nome utente-facing: **GASSMANN** (il sistema TTS sottostante resta Qwen3-TTS).
 
 **Avvio:**
 ```bash
-uvicorn app.main:create_app --factory --host 127.0.0.1 --port 8000
-# UI su http://127.0.0.1:8000
+uvicorn app.main:create_app --factory --host 127.0.0.1 --port 8000   # browser, UI su :8000
+./launch.sh                                                          # idem + apre il browser
+python -m app.desktop                                               # finestra desktop nativa
+# oppure doppio-click su GASSMANN.command (Finder) → app desktop
 ```
 
 **Struttura:** `app/main.py` (API + serve `app/static/`), `app/pipeline.py`
 (generazione + `stitch_scene`), `app/jobs.py` (coda async in-memory), `app/voices.py`
 (CRUD voci da `config/*.json`), `app/model_manager.py` (lazy-load modelli),
-`app/transcribe.py` (audio→ref_text).
+`app/transcribe.py` (audio→ref_text), `app/desktop.py` (wrapper pywebview),
+`app/biochem_text_preprocessor.py` (preprocessing termini scientifici).
 
 **Tab UI:** Genera (singolo) · Batch (più testi, stessa voce) · **Teatro** · Voci.
 
@@ -96,7 +100,8 @@ Config voce con varianti emotive (esempio):
 + restituisce i clip singoli. Le scene si esportano/importano come JSON (impostazioni +
 testi, no audio) dalla UI.
 
-**Test:** `python -m app.tests.test_stitch` (stitch) · `python -m app.tests.test_emotion` (DSP).
+**Test:** `python -m pytest tests/` (21 test). Singoli runnabili anche come modulo:
+`python -m tests.test_stitch` (stitch) · `python -m tests.test_emotion` (DSP).
 
 ## Setup Ambiente
 
@@ -181,34 +186,16 @@ sf.write("output.wav", wavs[0], sr)
 
 ## Comandi Comuni
 
-### Generazione Audio da File di Testo
+La vecchia CLI in `src/` è stata rimossa. **Tutto passa dall'app GASSMANN**
+(genera singolo, batch, voice cloning, Teatro): vedi sezione "App Standalone GASSMANN".
+
 ```bash
-# Script principale (da creare)
-python src/generate_audio.py --input INPUT/testo.txt --config config/voice_config.json
+uvicorn app.main:create_app --factory --host 127.0.0.1 --port 8000
+# oppure ./launch.sh — UI su http://127.0.0.1:8000
 ```
 
-### Elaborazione Batch
-```bash
-# Processa tutti i file in INPUT/
-python src/batch_process.py --config config/voice_config.json
-```
-
-### Generazione Lezioni Biochimica (con preprocessing terminologia scientifica)
-```bash
-# Genera audio di lezione con pronuncia corretta di termini scientifici
-python src/generate_biochem_lecture.py -i INPUT/biochemistry_sample.txt -o OUTPUT/lecture.wav
-
-# Preview del preprocessing senza generare audio
-python src/generate_biochem_lecture.py -i INPUT/file.txt -o dummy.wav --preview-preprocessing
-```
-
-**Nota**: Vedi `docs/BIOCHEMISTRY_TTS_GUIDE.md` per guida completa su generazione audio per lezioni scientifiche.
-
-### Web UI Demo Locale (per testing)
-```bash
-qwen-tts-demo Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign --ip 0.0.0.0 --port 8000
-# Aprire http://localhost:8000
-```
+- **Biochim**: nella tab Genera attiva l'opzione biochem (preprocessing termini
+  scientifici via `app/biochem_text_preprocessor.py`). Guida: `docs/BIOCHEMISTRY_TTS_GUIDE.md`.
 
 ## Ottimizzazioni per M3 Max
 
@@ -261,48 +248,10 @@ audio.export("output.mp3", format="mp3", bitrate="192k")
 
 ### Workflow Voice Cloning
 
-#### 1. Estrazione Audio da Video MP4
-```bash
-# Estrai audio completo
-python src/extract_audio_from_video.py -i video.mp4 -o VOICE_SAMPLES/voice.wav
-
-# Estrai 5 secondi dal secondo 10
-python src/extract_audio_from_video.py -i video.mp4 -o VOICE_SAMPLES/voice.wav --start 10 --duration 5
-
-# Batch: processa tutti i video in una cartella
-python src/extract_audio_from_video.py -i videos/ -o VOICE_SAMPLES/extracted/
-```
-
-#### 2. Preparazione Campione Ottimale (opzionale)
-```bash
-# Normalizza e rimuovi silenzio
-python src/prepare_voice_sample.py -i VOICE_SAMPLES/raw.wav -o VOICE_SAMPLES/speaker.wav
-
-# Suggerisci miglior segmento
-python src/prepare_voice_sample.py -i audio.mp3 --suggest
-```
-
-#### 3. Lista Campioni Disponibili
-```bash
-python src/list_voice_samples.py
-```
-
-#### 4. Generazione Audio con Voice Cloning
-
-**Singolo file:**
-```bash
-python src/generate_cloned_audio.py -i INPUT/testo.txt -c config/gazzolo.json -o OUTPUT/audio.wav
-```
-
-**Batch processing:**
-```bash
-python src/batch_clone_process.py -c config/gazzolo_docente.json
-```
-
-**Con preprocessing biochimica:**
-```bash
-python src/generate_cloned_audio.py -i INPUT/biochemistry.txt -c config/gazzolo_docente.json --use-biochem-preprocessor
-```
+Tutto via app GASSMANN (tab **Voci**): carichi un campione audio (3-10s), l'app
+trascrive automaticamente il `ref_text` (`POST /api/transcribe`, mlx-whisper) e crea
+la voce clone (`POST /api/voices`). La generazione usa poi quella voce in Genera/Batch/Teatro.
+La CLI `src/` (estrazione video, prepare campione, generate/batch) è stata rimossa.
 
 ### Configurazione Voice Cloning
 
@@ -367,6 +316,12 @@ sf.write("output.wav", wavs[0], sr)
 - [ ] Implementare voice mixing (combinare caratteristiche di più voci)
 - [ ] Aggiungere voice emotion control (controllo emozioni vocali)
 - [ ] Testare voice cloning con diverse lingue source/target
+- [ ] **Mode `custom_voice` (Qwen3-TTS-12Hz-1.7B-CustomVoice)**: voce sintetica con
+  9 speaker preset + emozione *nativa* via `instruct` (no DSP/cascata). API:
+  `model.generate_custom_voice(text, language, speaker, instruct)`. Limiti: voce non
+  clonabile (solo preset), nessuno speaker IT nativo (solo EN `Ryan`/`Aiden` cross-lingual).
+  Stimato ~30 righe in `pipeline.py` + dropdown speaker nel Teatro. Rimandato: sistema
+  attuale funziona, rischio risultato mediocre per l'italiano.
 
 ## Guide Pratiche
 

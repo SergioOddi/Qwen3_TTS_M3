@@ -4,9 +4,8 @@ qwen-tts>=0.0.5
 # Audio processing
 soundfile>=0.12.1
 pydub>=0.25.1
-
-# Web app
-Flask>=3.0.0
+librosa>=0.10.0
+numpy>=1.24.0
 
 # Model downloading (optional)
 modelscope>=1.11.0
@@ -19,9 +18,11 @@ torch>=2.0.0
 tqdm>=4.65.0
 
 # App standalone (web UI locale)
+fastapi>=0.110.0
 uvicorn>=0.30.0
 python-multipart>=0.0.9
 mlx-whisper>=0.4.0
+pywebview>=5.0          # app desktop (finestra nativa, doppio-click)
 
 # Test
 pytest>=8.0.0

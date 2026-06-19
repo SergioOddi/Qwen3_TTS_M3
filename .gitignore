@@ -52,6 +52,10 @@ VOICE_SAMPLES/extracted/*.mp3
 !VOICE_SAMPLES/.gitkeep
 !VOICE_SAMPLES/extracted/.gitkeep
 
+# Audio sorgente clonazione archiviato (input, non doc - resta solo in locale)
+docs/CLONAGGIO/INPUT_VOCE_da_CLONARE/*.wav
+docs/CLONAGGIO/INPUT_VOCE_da_CLONARE/*.m4a
+
 # File di input (opzionale - dipende dal workflow)
 INPUT/*.txt
 INPUT/*.md

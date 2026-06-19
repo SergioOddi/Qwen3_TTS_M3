@@ -1,12 +1,8 @@
 """Collega voci + preprocessing + modello + salvataggio file."""
-import sys
-
 import soundfile as sf
 
 from app import config as appconfig
 from app import voices
-
-sys.path.insert(0, str(appconfig.SRC_DIR))
 
 
 # Frasi instruct per il modello VoiceDesign (le voci clone le ignorano)
@@ -49,7 +45,7 @@ def apply_emotion_dsp(audio, sr, emotion):
 
 def _preprocess_biochem(text: str) -> str:
     try:
-        from biochem_text_preprocessor import BiochemTextPreprocessor
+        from app.biochem_text_preprocessor import BiochemTextPreprocessor
         return BiochemTextPreprocessor().process_text(text)
     except Exception:
         return text
