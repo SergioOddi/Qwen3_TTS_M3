@@ -92,3 +92,6 @@ a[download] { display: inline-block; margin-top: .5rem; color: var(--accent); }
 .t-block-actions { gap: .4rem; align-items: center; flex-wrap: wrap; }
 .t-block-actions button { flex: 0 0 auto; padding: .35rem .7rem; }
 .t-block-actions .t-regen { margin-left: auto; }
+.te-sex { display: flex; gap: .25rem; }
+.te-sex button { flex: 1; opacity: .55; }
+.te-sex button.active { opacity: 1; outline: 2px solid currentColor; }

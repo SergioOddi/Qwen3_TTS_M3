@@ -13,6 +13,7 @@
       <button class="tab active" data-tab="genera">Genera</button>
       <button class="tab" data-tab="batch">Batch</button>
       <button class="tab" data-tab="teatro">Teatro</button>
+      <button class="tab" data-tab="teatro-emo">Teatro-Emozioni</button>
       <button class="tab" data-tab="voci">Voci</button>
     </nav>
   </header>
@@ -83,6 +84,30 @@
       <a id="t-download" class="hidden" download>⬇ Scarica scena</a>
     </section>
 
+    <!-- TEATRO-EMOZIONI -->
+    <section id="teatro-emo" class="panel">
+      <p>Come Teatro, ma con voci sintetiche (design): per ogni battuta scegli <strong>Sesso → Voce → Emozione</strong>. L'emozione è nativa (instruct), non DSP.</p>
+      <div class="row">
+        <div><label>Nome scena</label><input id="te-title" type="text" value="scena"></div>
+        <div><label>Formato</label><select id="te-format"><option>wav</option><option>mp3</option></select></div>
+      </div>
+      <div id="te-blocks"></div>
+      <div class="row" style="margin-top:.75rem">
+        <button id="te-add">+ Aggiungi battuta</button>
+        <button id="te-export">⬇ Esporta scena</button>
+        <button id="te-import-btn" title="JSON esportato, oppure .txt/.md con battute separate da una riga '---'">⬆ Importa scena</button>
+        <input id="te-import" type="file" accept=".json,.txt,.md,application/json,text/plain,text/markdown" class="hidden">
+      </div>
+      <button id="te-genall" class="genall" title="Genera tutte le battute da zero e le unisce nella scena">🎬 Genera scena completa</button>
+      <button id="te-stop" class="stop hidden" title="Ferma ora la generazione; le battute già pronte restano">⏹ Stop</button>
+      <button id="te-run" class="primary" title="Unisce solo i clip già generati (↻ Rigenera), senza rigenerarli">Unisci battute in scena</button>
+      <div id="te-status" class="status"></div>
+      <progress id="te-progress" class="hidden"></progress>
+      <label class="hidden" id="te-scene-label">Scena completa</label>
+      <audio id="te-scene" controls class="hidden"></audio>
+      <a id="te-download" class="hidden" download>⬇ Scarica scena</a>
+    </section>
+
     <!-- template blocco teatro (clonato da app.js) -->
     <template id="t-block-tpl">
       <div class="t-block">
@@ -109,6 +134,42 @@
         </div>
         <progress class="t-prog hidden"></progress>
         <audio class="t-clip hidden" controls></audio>
+      </div>
+    </template>
+
+    <!-- template blocco teatro-emozioni (clonato da app.js) -->
+    <template id="te-block-tpl">
+      <div class="te-block">
+        <div class="row">
+          <div><label>Personaggio</label><input class="te-char" type="text" placeholder="es. AMLETO"/></div>
+          <div><label>Sesso</label><div class="te-sex">
+            <button type="button" class="te-sex-male">♂ Uomo</button>
+            <button type="button" class="te-sex-female">♀ Donna</button>
+          </div></div>
+          <div><label>Voce</label><select class="te-voice"></select></div>
+          <div><label>Emozione</label><select class="te-emotion"></select></div>
+        </div>
+        <div class="row">
+          <div><label>Velocità</label><select class="te-speed">
+            <option value="0.8">0.8×</option><option value="0.9">0.9×</option>
+            <option value="1.0" selected="selected">1.0×</option>
+            <option value="1.1">1.1×</option><option value="1.2">1.2×</option>
+          </select></div>
+          <div><label>Pausa dopo (sec)</label><input class="te-pause" type="number" min="0" step="0.1" value="0.5"/></div>
+        </div>
+        <label>Istruzione libera <small>(combinata con l'emozione)</small></label>
+        <input class="te-instruct" type="text" placeholder="es. sussurrando"/>
+        <label>Battuta</label>
+        <textarea class="te-text" rows="2" placeholder="testo della battuta…"></textarea>
+        <div class="row te-block-actions">
+          <button class="te-up" title="Su">↑</button>
+          <button class="te-down" title="Giù">↓</button>
+          <button class="te-dup" title="Duplica">⧉</button>
+          <button class="te-regen" title="Rigenera solo questa battuta">↻ Rigenera</button>
+          <button class="te-del" title="Elimina">✕</button>
+        </div>
+        <progress class="te-prog hidden"></progress>
+        <audio class="te-clip hidden" controls="controls"></audio>
       </div>
     </template>
 
