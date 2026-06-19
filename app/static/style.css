@@ -77,21 +77,21 @@ ul#b-results li { padding: .4rem 0; border-bottom: 1px solid var(--border); }
 a[download] { display: inline-block; margin-top: .5rem; color: var(--accent); }
 .b-item { display: flex; gap: .5rem; margin: .4rem 0; }
 .b-item input { flex: 0 0 140px; } .b-item textarea { flex: 1; }
-#t-blocks { counter-reset: tblock; }
-.t-block {
+#t-blocks, #te-blocks { counter-reset: tblock; }
+.t-block, .te-block {
   background: var(--panel); border: 1px solid var(--border);
   border-left: 3px solid var(--accent); border-radius: 10px;
   padding: .85rem .85rem .85rem 1rem; margin: 1.1rem 0;
   box-shadow: 0 2px 8px rgba(0,0,0,.35);
 }
-.t-block::before {
+.t-block::before, .te-block::before {
   counter-increment: tblock; content: "Battuta " counter(tblock);
   display: block; font-size: .7rem; letter-spacing: .04em; text-transform: uppercase;
   color: var(--accent); font-weight: 600; margin-bottom: .5rem;
 }
-.t-block-actions { gap: .4rem; align-items: center; flex-wrap: wrap; }
-.t-block-actions button { flex: 0 0 auto; padding: .35rem .7rem; }
-.t-block-actions .t-regen { margin-left: auto; }
+.t-block-actions, .te-block-actions { gap: .4rem; align-items: center; flex-wrap: wrap; }
+.t-block-actions button, .te-block-actions button { flex: 0 0 auto; padding: .35rem .7rem; }
+.t-block-actions .t-regen, .te-block-actions .te-regen { margin-left: auto; }
 .te-sex { display: flex; gap: .25rem; }
 .te-sex button { flex: 1; opacity: .55; }
 .te-sex button.active { opacity: 1; outline: 2px solid currentColor; }

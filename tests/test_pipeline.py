@@ -30,6 +30,20 @@ def test_pipeline_design(tmp_dirs):
     assert sr == 24000
 
 
+def test_pipeline_design_speed_stretches(tmp_dirs):
+    """La Velocità deve agire anche sulle voci design (time-stretch post-genera):
+    a 0.5× la durata raddoppia rispetto a 1.0×."""
+    _write(tmp_dirs["config"], "narr", {
+        "language": "Italian", "voice_description": "x"})
+    base = pipeline.run_generation(FakeMM(), text="ciao", voice_id="narr",
+                                   fmt="wav", speed=1.0, out_name="base")
+    slow = pipeline.run_generation(FakeMM(), text="ciao", voice_id="narr",
+                                   fmt="wav", speed=0.5, out_name="slow")
+    n_base = len(sf.read(base)[0])
+    n_slow = len(sf.read(slow)[0])
+    assert n_slow > n_base * 1.5
+
+
 def test_pipeline_clone_uses_ref(tmp_dirs):
     sample = tmp_dirs["samples"] / "z.wav"
     sf.write(sample, np.zeros(24000, dtype="float32"), 24000)

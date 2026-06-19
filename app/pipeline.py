@@ -86,6 +86,12 @@ def run_generation(model_manager, text, voice_id, fmt="wav",
         audio, sr = model_manager.generate_design(
             text=text, language=info["language"],
             voice_description=instruct_final, temperature=temperature)
+        # generate_design non accetta speed → time-stretch qui (come il clone),
+        # così la Velocità del Teatro-Emozioni funziona anche sulle voci design
+        speed_factor = speed if speed is not None else 1.0
+        if speed_factor and speed_factor != 1.0:
+            import librosa
+            audio = librosa.effects.time_stretch(audio.astype("float32"), rate=speed_factor)
     else:
         cfg = voices.load_config(voice_id)
         # cascata emozione: campione emotivo (qualità reale) → altrimenti DSP fallback
