@@ -55,6 +55,37 @@ def test_manager_roundtrip():
             pass
 
 
+def test_delete_removes_orphan_keeps_shared():
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        appconfig.PROJECT_ROOT = root
+        appconfig.CONFIG_DIR = root / "config"
+        appconfig.SAMPLES_DIR = root / "VOICE_SAMPLES"
+        appconfig.CONFIG_DIR.mkdir()
+        appconfig.SAMPLES_DIR.mkdir()
+
+        def voice(name, sample):
+            sf.write(appconfig.SAMPLES_DIR / sample, np.ones(2400, "float32"), 24000)
+            (appconfig.CONFIG_DIR / f"{name}.json").write_text(json.dumps({
+                "mode": "voice_clone", "prompt_speech_path": f"VOICE_SAMPLES/{sample}",
+                "ref_text": "x",
+            }), encoding="utf-8")
+
+        # due voci che condividono lo stesso campione + una con campione proprio
+        voice("capone", "capone.wav")
+        voice("capone_docente", "capone.wav")  # stesso sample
+        voice("solo", "solo.wav")
+
+        voices.delete_voice("capone")
+        assert (appconfig.SAMPLES_DIR / "capone.wav").exists(), \
+            "sample condiviso con capone_docente NON va cancellato"
+
+        voices.delete_voice("solo")
+        assert not (appconfig.SAMPLES_DIR / "solo.wav").exists(), \
+            "sample orfano va cancellato"
+
+
 if __name__ == "__main__":
     test_manager_roundtrip()
+    test_delete_removes_orphan_keeps_shared()
     print("ok")

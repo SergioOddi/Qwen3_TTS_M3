@@ -32,6 +32,8 @@ class GenerateReq(BaseModel):
     instruct: str | None = None
     emotion: str | None = None
     temperature: float | None = None
+    pitch: float | None = None   # DSP: semitoni (+/-)
+    gain: float | None = None    # DSP: dB (+/-)
 
 
 class UpdateVoiceReq(BaseModel):
@@ -196,7 +198,8 @@ def create_app(model_manager=None, job_queue=None) -> FastAPI:
             mm, text=req.text, voice_id=req.voice_id,
             fmt=req.format, biochem=req.biochem, speed=req.speed,
             instruct=req.instruct, emotion=req.emotion,
-            temperature=req.temperature, progress=progress))
+            temperature=req.temperature, pitch=req.pitch, gain=req.gain,
+            progress=progress))
         return {"job_id": jid}
 
     @app.post("/api/batch")

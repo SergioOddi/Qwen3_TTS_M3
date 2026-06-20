@@ -55,7 +55,7 @@ python -m app.desktop                                               # finestra d
 - `GET /api/voices` · `POST /api/voices` (crea clone) · `GET /api/voices/{id}/sample`
 - `POST /api/voices/{id}/emotion` (aggiunge variante emotiva: campione + ref_text)
 - `POST /api/transcribe`
-- `POST /api/generate` → `{job_id}` (campi: text, voice_id, format, biochem, speed, emotion, instruct, temperature)
+- `POST /api/generate` → `{job_id}` (campi: text, voice_id, format, biochem, speed, emotion, instruct, temperature, pitch, gain)
 - `POST /api/batch` → `{job_id}`
 - `POST /api/teatro` → `{job_id}`
 - `GET /api/jobs/{jid}` (polling: queued/running/done/error)
@@ -71,10 +71,17 @@ imparare le battute di un monologo o dialogo a più voci alternate.
 - `voice_id` — voce (dropdown da `/api/voices`); le **varianti emotive** appaiono come
   voci separate (`Sergio · triste`), value `id|emozione` → `emotion` derivata dal menu
 - `speed` — velocità: 0.8 / 0.9 / 1.0 / 1.1 / 1.2 (via librosa time-stretch)
-- `instruct` — istruzione libera, **solo voci design** (il modello clone la ignora)
+- `instruct` — istruzione libera, **solo voci design** (il modello clone la ignora).
+  In Teatro-Emozioni: **chip preset** (sussurrato/concitato/…) che si accodano al campo.
 - `text` — la battuta
 - `pause_after` — secondi di silenzio dopo la battuta nella scena
-- Azioni per blocco: su / giù / duplica / elimina / **rigenera** (riusa `/api/generate`)
+- **Solo Teatro-Emozioni** — leve extra di resa: `temperature` (espressività, nativa
+  modello), `pitch` (semitoni) e `gain` (dB) DSP post via `apply_dsp` in `pipeline.py`
+  (euristico, ±2 semitoni ok; per resa "vera" preferire instruct/temperature).
+- Azioni per blocco: su / giù / duplica / elimina / **rigenera** (riusa `/api/generate`) ·
+  **💾 Salva come voce** (solo Teatro-Emozioni): congela il clip generato come nuova voce
+  **clone** riusabile in Teatro. Furbata: `ref_text` = la battuta stessa (no trascrizione);
+  riusa `POST /api/voices` + `POST /api/voices/{id}/emotion` (zero backend nuovo).
 
 **IMPORTANTE — emozioni e limite del modello:** il modello Base (voci clonate,
 `generate_voice_clone`) **non** supporta `instruct`: l'emozione da testo funziona solo

@@ -64,9 +64,26 @@ def _to_mp3(wav_path: str) -> str:
     return mp3_path
 
 
+def apply_dsp(audio, sr, semitones=0.0, gain_db=0.0):
+    """Pitch-shift (semitoni) + gain (dB) manuali, post-generazione.
+    # ponytail: euristico, può degradare la naturalezza — usare con moderazione
+    # (±4 semitoni / ±6 dB). Per controllo "vero" sulle design usa instruct/temperature."""
+    if not semitones and not gain_db:
+        return audio
+    import numpy as np
+    import librosa
+    y = audio.astype("float32")
+    if semitones:
+        y = librosa.effects.pitch_shift(y, sr=sr, n_steps=float(semitones))
+    if gain_db:
+        y = y * (10 ** (float(gain_db) / 20))
+    return np.clip(y, -1.0, 1.0)
+
+
 def run_generation(model_manager, text, voice_id, fmt="wav",
                    biochem=False, out_name=None, progress=None, speed=None,
-                   instruct=None, emotion=None, temperature=None):
+                   instruct=None, emotion=None, temperature=None,
+                   pitch=None, gain=None):
     info = voices.get_voice(voice_id)
     if info is None:
         raise ValueError(f"voce non trovata: {voice_id}")
@@ -109,6 +126,8 @@ def run_generation(model_manager, text, voice_id, fmt="wav",
             ref_text=ref_text, speed_factor=speed_factor, temperature=temperature)
         if dsp_emotion:
             audio = apply_emotion_dsp(audio, sr, dsp_emotion)
+    # DSP manuale (pitch/gain) sopra a tutto: vale design e clone
+    audio = apply_dsp(audio, sr, pitch or 0.0, gain or 0.0)
     if progress:
         progress(0.8)
 

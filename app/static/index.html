@@ -155,10 +155,31 @@
             <option value="1.0" selected>1.0×</option>
             <option value="1.1">1.1×</option><option value="1.2">1.2×</option>
           </select></div>
+          <div><label>Espressività (temp)</label><select class="te-temp" title="Variabilità del modello: bassa = stabile, alta = vivace">
+            <option value="0.6">0.6 stabile</option><option value="0.7">0.7</option>
+            <option value="0.8" selected>0.8</option><option value="0.9">0.9</option>
+            <option value="1.0">1.0</option><option value="1.1">1.1</option>
+            <option value="1.2">1.2 vivace</option>
+          </select></div>
+          <div><label>Pitch (semitoni)</label><select class="te-pitch" title="DSP post: alza/abbassa il tono. Euristico, usare con moderazione">
+            <option value="-4">-4</option><option value="-2">-2</option>
+            <option value="0" selected>0</option><option value="2">+2</option><option value="4">+4</option>
+          </select></div>
+          <div><label>Volume (dB)</label><select class="te-gain" title="DSP post: guadagno">
+            <option value="-6">-6</option><option value="-3">-3</option>
+            <option value="0" selected>0</option><option value="3">+3</option><option value="6">+6</option>
+          </select></div>
           <div><label>Pausa dopo (sec)</label><input class="te-pause" type="number" min="0" step="0.1" value="0.5"></div>
         </div>
         <label>Istruzione libera <small>(combinata con l'emozione)</small></label>
         <input class="te-instruct" type="text" placeholder="es. sussurrando">
+        <div class="row te-chips">
+          <button type="button" class="te-chip">sussurrato</button>
+          <button type="button" class="te-chip">concitato</button>
+          <button type="button" class="te-chip">lento e pensoso</button>
+          <button type="button" class="te-chip">voce roca</button>
+          <button type="button" class="te-chip">enfatico</button>
+        </div>
         <label>Battuta</label>
         <textarea class="te-text" rows="2" placeholder="testo della battuta…"></textarea>
         <div class="row te-block-actions">
@@ -166,6 +187,7 @@
           <button class="te-down" title="Giù">↓</button>
           <button class="te-dup" title="Duplica">⧉</button>
           <button class="te-regen" title="Rigenera solo questa battuta">↻ Rigenera</button>
+          <button class="te-savevoice" title="Salva questa battuta generata come nuova voce clone, riusabile in Teatro">💾 Salva come voce</button>
           <button class="te-del" title="Elimina">✕</button>
         </div>
         <progress class="te-prog hidden"></progress>

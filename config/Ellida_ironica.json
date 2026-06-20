@@ -1,0 +1,19 @@
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "voice_name": "Ellida_ironica",
+  "prompt_speech_path": "VOICE_SAMPLES/Ellida_ironica.wav",
+  "ref_text": "Fredda? Dio mio, per me l'acqua di qui non è mai abbastanza fredda. È tiepida, quasi grassa. L'acqua di fiordo è come se fosse malata.",
+  "output_format": "wav",
+  "sample_rate": 24000,
+  "speed_factor": 1.0,
+  "tags": [
+    "ironico"
+  ],
+  "emotion_samples": {
+    "ironico": "VOICE_SAMPLES/Ellida_ironica_ironico.wav"
+  },
+  "emotion_ref_texts": {
+    "ironico": "Fredda? Dio mio, per me l'acqua di qui non è mai abbastanza fredda. È tiepida, quasi grassa. L'acqua di fiordo è come se fosse malata."
+  }
+}

@@ -258,15 +258,32 @@ def update_voice(voice_id, *, new_id=None, language=None, tags=None,
 
 
 def delete_voice(voice_id: str) -> None:
-    """Elimina solo il config. I campioni audio NON si toccano: sono spesso
-    condivisi tra più voci (es. capone/capone_docente) o esterni a VOICE_SAMPLES.
-    ponytail: orfani innocui; cancellarli romperebbe le voci sorelle."""
+    """Elimina il config e i suoi campioni audio orfani. Un campione resta se è
+    ancora referenziato da un'altra voce (es. capone/capone_docente lo condividono)
+    o se è fuori da VOICE_SAMPLES (path esterno/assoluto, non nostro da cancellare)."""
     if not _safe_voice_id(voice_id):
         raise ValueError("voice_id non valido")
     path = appconfig.CONFIG_DIR / f"{voice_id}.json"
     if not path.exists():
         raise ValueError("voce non trovata")
+    cfg = json.loads(path.read_text(encoding="utf-8"))
     path.unlink()
+    # campioni ancora usati da un'altra voce → non toccare
+    in_use = set()
+    for other in appconfig.CONFIG_DIR.glob("*.json"):
+        try:
+            in_use.update(_sample_rels(json.loads(other.read_text(encoding="utf-8"))))
+        except (json.JSONDecodeError, OSError):
+            continue  # config illeggibile: per prudenza lo trattiamo come referenziante nulla
+    for rel in _sample_rels(cfg):
+        if rel in in_use:
+            continue
+        p = _resolve(rel)
+        try:
+            p.relative_to(appconfig.SAMPLES_DIR)  # solo dentro VOICE_SAMPLES
+        except ValueError:
+            continue
+        p.unlink(missing_ok=True)
 
 
 def _sample_rels(cfg: dict) -> list[str]:

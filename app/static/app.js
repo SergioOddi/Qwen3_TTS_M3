@@ -241,18 +241,25 @@ function makeTeatro({ prefix, fillVoiceUI, readVoice }) {
     cls(el, "up").onclick = () => el.previousElementSibling?.before(el);
     cls(el, "down").onclick = () => el.nextElementSibling?.after(el);
     cls(el, "regen").onclick = () => regenBlock(el);
+    const sv = cls(el, "savevoice");  // solo Teatro-Emozioni ha questo bottone
+    if (sv) sv.onclick = () => saveBlockAsVoice(el);
+    el.querySelectorAll(`.${prefix}-chip`).forEach((c) => c.onclick = () => {  // solo te
+      const inp = cls(el, "instruct");
+      inp.value = inp.value.trim() ? inp.value.trim() + ", " + c.textContent : c.textContent;
+    });
     P("blocks").appendChild(el);
     return el;
   }
 
   function readBlock(div) {
-    const { voice_id, emotion } = readVoice(div);
+    const v = readVoice(div);  // { voice_id, emotion, [temperature, pitch, gain] }
     const clipEl = cls(div, "clip");
-    const clip = clipEl && !clipEl.classList.contains("hidden") && clipEl.src
-      ? clipEl.src.split("/").pop() : null;
+    // dataset.file = nome pulito (src ha ?t= per bustare la cache, vedi regenBlock)
+    const clip = clipEl && !clipEl.classList.contains("hidden") && clipEl.dataset.file
+      ? clipEl.dataset.file : null;
     return {
       character: cls(div, "char").value.trim(),
-      voice_id, emotion,
+      ...v,
       speed: parseFloat(cls(div, "speed").value),
       instruct: cls(div, "instruct").value.trim(),
       pause_after: parseFloat(cls(div, "pause").value) || 0,
@@ -280,7 +287,8 @@ function makeTeatro({ prefix, fillVoiceUI, readVoice }) {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text: b.text, voice_id: b.voice_id, format: "wav",
                              speed: b.speed, emotion: b.emotion,
-                             instruct: b.instruct || null }),
+                             instruct: b.instruct || null,
+                             temperature: b.temperature, pitch: b.pitch, gain: b.gain }),
     });
     if (!r.ok) { prog.classList.add("hidden"); setStatus(P("status"), "Errore: " + (await r.text()), "err"); return false; }
     const { job_id } = await r.json();
@@ -292,10 +300,41 @@ function makeTeatro({ prefix, fillVoiceUI, readVoice }) {
       return false;
     }
     prog.classList.add("hidden");
-    clip.src = "/api/outputs/" + job.result.split("/").pop();
+    const fname = job.result.split("/").pop();
+    clip.dataset.file = fname;  // nome file deterministico → ?t= forza il refetch
+    clip.src = "/api/outputs/" + fname + "?t=" + Date.now();
     clip.classList.remove("hidden");
     setStatus(P("status"), "Battuta pronta ✓", "ok");
     return true;
+  }
+
+  // Furbata: congela il clip generato (design, non-deterministico) come voce clone
+  // riproducibile. ref_text = la battuta stessa → nessuna trascrizione necessaria.
+  async function saveBlockAsVoice(div) {
+    const b = readBlock(div);
+    if (!b.clip) { setStatus(P("status"), "Genera prima la battuta (↻ Rigenera)", "err"); return; }
+    if (!b.text) { setStatus(P("status"), "Battuta vuota", "err"); return; }
+    const name = (prompt("Nome della nuova voce:", b.character || "") || "").trim();
+    if (!name) return;
+    setStatus(P("status"), "Salvo la voce…", "");
+    const blob = await (await fetch("/api/outputs/" + b.clip)).blob();
+    const fd = new FormData();
+    fd.append("name", name);
+    fd.append("ref_text", b.text);
+    if (b.emotion) fd.append("tags", b.emotion);
+    fd.append("audio", blob, "voce.wav");
+    const r = await fetch("/api/voices", { method: "POST", body: fd });
+    if (!r.ok) { setStatus(P("status"), "Errore: " + (await r.text()), "err"); return; }
+    const voice = await r.json();
+    if (b.emotion) {  // registra anche la variante emotiva (stesso clip+testo)
+      const ef = new FormData();
+      ef.append("emotion", b.emotion);
+      ef.append("ref_text", b.text);
+      ef.append("audio", blob, "voce.wav");
+      await fetch(`/api/voices/${encodeURIComponent(voice.id)}/emotion`, { method: "POST", body: ef });
+    }
+    await loadVoices();
+    setStatus(P("status"), `Voce "${voice.id}" salvata ✓ — ora disponibile in Teatro`, "ok");
   }
 
   async function genAll() {
@@ -347,7 +386,7 @@ function makeTeatro({ prefix, fillVoiceUI, readVoice }) {
     const divs = [...P("blocks").querySelectorAll(`.${prefix}-block`)].filter((d) => readBlock(d).text);
     job.result.clips.forEach((c, i) => {
       const clip = divs[i] && cls(divs[i], "clip");
-      if (clip) { clip.src = "/api/outputs/" + c.path.split("/").pop(); clip.classList.remove("hidden"); }
+      if (clip) { const fn = c.path.split("/").pop(); clip.dataset.file = fn; clip.src = "/api/outputs/" + fn + "?t=" + Date.now(); clip.classList.remove("hidden"); }
     });
     setStatus(P("status"), "Scena pronta ✓", "ok");
   }
@@ -437,11 +476,17 @@ const teatroEmo = makeTeatro({
     emoSel.innerHTML = ["neutro", ...EMOTIONS]
       .map((e) => `<option value="${esc(e)}">${esc(e)}</option>`).join("");
     if (data.emotion) emoSel.value = data.emotion;
+    if (data.temperature != null) el.querySelector(".te-temp").value = String(data.temperature);
+    if (data.pitch != null) el.querySelector(".te-pitch").value = String(data.pitch);
+    if (data.gain != null) el.querySelector(".te-gain").value = String(data.gain);
   },
   readVoice(el) {
     const emo = el.querySelector(".te-emotion").value;
     return { voice_id: el.querySelector(".te-voice").value,
-             emotion: emo === "neutro" ? null : emo };
+             emotion: emo === "neutro" ? null : emo,
+             temperature: parseFloat(el.querySelector(".te-temp").value),
+             pitch: parseFloat(el.querySelector(".te-pitch").value),
+             gain: parseFloat(el.querySelector(".te-gain").value) };
   },
 });
 
