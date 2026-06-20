@@ -64,6 +64,32 @@ def _to_mp3(wav_path: str) -> str:
     return mp3_path
 
 
+def _trim_onset_blip(audio, sr, frame_ms=10, thr=0.02, gap_ms=30, max_cut_ms=90):
+    """Rimuove il transiente di warm-up del modello a inizio clip: un blip corto
+    seguito da un gap di silenzio prima della voce vera. Conservativo — taglia solo
+    se trova quel pattern entro max_cut_ms, altrimenti lascia l'audio intatto.
+    # ponytail: euristico su energia; se mai mangiasse la prima sillaba alza
+    # max_cut_ms/thr (o mettilo dietro un flag)."""
+    import numpy as np
+    y = audio.astype("float32")
+    w = max(1, int(sr * frame_ms / 1000))
+    n = min(len(y) // w, int(400 / frame_ms))
+    if n < 4:
+        return audio
+    rms = np.array([np.sqrt((y[i*w:(i+1)*w]**2).mean()) for i in range(n)])
+    if rms[0] <= thr and rms[1] <= thr:
+        return audio  # parte già in silenzio: nessun blip da togliere
+    quiet = rms <= thr
+    gapf = max(1, int(gap_ms / frame_ms))
+    run = 0
+    for i in range(1, n):
+        run = run + 1 if quiet[i] else 0
+        if run >= gapf:                       # primo gap di silenzio dopo l'inizio
+            cut = (i - run + 1) * w
+            return y[cut:] if cut <= max_cut_ms / 1000 * sr else audio
+    return audio  # nessun gap precoce: probabilmente parte subito a parlare
+
+
 def apply_dsp(audio, sr, semitones=0.0, gain_db=0.0):
     """Pitch-shift (semitoni) + gain (dB) manuali, post-generazione.
     # ponytail: euristico, può degradare la naturalezza — usare con moderazione
@@ -126,6 +152,7 @@ def run_generation(model_manager, text, voice_id, fmt="wav",
             ref_text=ref_text, speed_factor=speed_factor, temperature=temperature)
         if dsp_emotion:
             audio = apply_emotion_dsp(audio, sr, dsp_emotion)
+    audio = _trim_onset_blip(audio, sr)  # via il rumore di warm-up iniziale
     # DSP manuale (pitch/gain) sopra a tutto: vale design e clone
     audio = apply_dsp(audio, sr, pitch or 0.0, gain or 0.0)
     if progress:
