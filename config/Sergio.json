@@ -1,0 +1,15 @@
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "voice_name": "Sergio",
+  "prompt_speech_path": "VOICE_SAMPLES/Sergio.wav",
+  "ref_text": "Mia cara, stai gettando il discredito sulla nostra cittadina balneare. Debbo scendere un momento nel laboratorio. Ellida, dovresti occuparti tu del nostro ospite. Non mi ci vorrà molto tempo.",
+  "output_format": "wav",
+  "sample_rate": 24000,
+  "speed_factor": 1.0,
+  "tags": [
+    "calmo",
+    " misurato"
+  ],
+  "instruct": "calmo, misurato"
+}
