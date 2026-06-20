@@ -109,7 +109,7 @@ def create_app(model_manager=None, job_queue=None) -> FastAPI:
             info = voices.create_clone(
                 name=name, language=language, audio_bytes=audio.file.read(),
                 ref_text=ref_text, instruct=instruct,
-                tags=[t for t in tags.split(",") if t.strip()],
+                tags=[t.strip() for t in tags.split(",") if t.strip()],
             )
         except ValueError as e:
             raise HTTPException(400, str(e))
