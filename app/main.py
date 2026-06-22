@@ -1,5 +1,4 @@
 """FastAPI app: REST API + serve la single-page UI."""
-import os
 from pathlib import Path
 from typing import Literal
 
@@ -168,25 +167,6 @@ def create_app(model_manager=None, job_queue=None) -> FastAPI:
                 voice_id, emotion, audio.file.read(), ref_text)
         except ValueError as e:
             raise HTTPException(400, str(e))
-
-    @app.post("/api/transcribe")
-    def api_transcribe(language: str = Form("Italian"),
-                       audio: UploadFile = File(...)):
-        import tempfile
-        from app.transcribe import transcribe
-        suffix = Path(audio.filename or "a.wav").suffix or ".wav"
-        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as f:
-            f.write(audio.file.read())
-            tmp = f.name
-        try:
-            return {"text": transcribe(tmp, language)}
-        except RuntimeError as e:
-            raise HTTPException(503, str(e))
-        finally:
-            try:
-                os.unlink(tmp)
-            except OSError:
-                pass
 
     @app.post("/api/generate")
     def api_generate(req: GenerateReq):

@@ -1,0 +1,13 @@
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "voice_name": "Luca_confuso",
+  "prompt_speech_path": "VOICE_SAMPLES/Luca-confuso.wav",
+  "ref_text": "Non capisco perché sei andata a ripescare questa vicenda. Allora io non c'entravo. E non ti ho mai chiesto, mai, chi fosse quell'uomo.",
+  "output_format": "wav",
+  "sample_rate": 24000,
+  "speed_factor": 1.0,
+  "tags": [],
+  "instruct": "confuso",
+  "voice_notes": ""
+}

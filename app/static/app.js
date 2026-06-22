@@ -532,23 +532,6 @@ function currentSampleBlob() {
   return recBlob;  // registrazione o file caricato
 }
 
-async function transcribeInto(blob, lang, filename, statusSel, reftextSel) {
-  setStatus(statusSel, "Trascrizione in corso…", "");
-  const fd = new FormData();
-  fd.append("language", lang);
-  fd.append("audio", blob, filename);
-  const r = await fetch("/api/transcribe", { method: "POST", body: fd });
-  if (!r.ok) { setStatus(statusSel, "Trascrizione non disponibile: " + (await r.text()), "err"); return; }
-  $(reftextSel).value = (await r.json()).text;
-  setStatus(statusSel, "Trascrizione pronta (correggi se serve) ✓", "ok");
-}
-
-$("#v-transcribe").onclick = () => {
-  const blob = currentSampleBlob();
-  if (!blob) { setStatus("#v-status", "Prima registra o carica un campione", "err"); return; }
-  transcribeInto(blob, $("#v-language").value, "sample.webm", "#v-status", "#v-reftext");
-};
-
 $("#v-save").onclick = async () => {
   const blob = currentSampleBlob();
   if (!blob) { setStatus("#v-status", "Manca il campione audio", "err"); return; }
@@ -572,10 +555,6 @@ let eBlob = null;
 $("#e-file").onchange = (e) => {
   eBlob = e.target.files[0] || null;
   if (eBlob) { $("#e-sample").src = URL.createObjectURL(eBlob); $("#e-sample").classList.remove("hidden"); }
-};
-$("#e-transcribe").onclick = () => {
-  if (!eBlob) { setStatus("#e-status", "Carica prima un campione", "err"); return; }
-  transcribeInto(eBlob, "Italian", eBlob.name || "sample.wav", "#e-status", "#e-reftext");
 };
 $("#e-save").onclick = async () => {
   if (!eBlob) { setStatus("#e-status", "Manca il campione audio", "err"); return; }

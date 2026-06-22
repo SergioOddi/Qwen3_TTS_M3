@@ -1,0 +1,11 @@
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "voice_name": "Luca_determinato",
+  "prompt_speech_path": "VOICE_SAMPLES/Luca_determinato.wav",
+  "ref_text": "È molto semplice: ce ne andremo via di qua. Si, torneremo a vivere sul promontorio… Al Faro… Lontano dal paese… dove tu possa trovare una vera casa, secondo il desiderio del tuo cuore.",
+  "output_format": "wav",
+  "sample_rate": 24000,
+  "speed_factor": 1.0,
+  "tags": []
+}

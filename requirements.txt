@@ -21,7 +21,6 @@ tqdm>=4.65.0
 fastapi>=0.110.0
 uvicorn>=0.30.0
 python-multipart>=0.0.9
-mlx-whisper>=0.4.0
 pywebview>=5.0          # app desktop (finestra nativa, doppio-click)
 
 # Test
