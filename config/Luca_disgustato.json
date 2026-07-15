@@ -1,0 +1,12 @@
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "voice_name": "Luca_disgustato",
+  "prompt_speech_path": "VOICE_SAMPLES/Luca_disgustato.wav",
+  "ref_text": "Che schifo! buttalo via, mi fa venire il voltastomaco solo a guardarlo. È... viscido, grigio... spostatelo! No, davvero, pulisci lì per terra prima che mi venga da vomitare. Ma come fate anche solo a toccarlo?!",
+  "output_format": "wav",
+  "sample_rate": 24000,
+  "speed_factor": 1.0,
+  "tags": [],
+  "instruct": "disgusto"
+}
