@@ -1,6 +1,7 @@
 // node app/static/scene_parse.test.mjs
 import { createRequire } from "module";
-const { parseScene, parseSceneText, parseScreenplay } = createRequire(import.meta.url)("./scene_parse.js");
+const { parseScene, parseSceneText, parseScreenplay, sceneToMarkdown } =
+  createRequire(import.meta.url)("./scene_parse.js");
 import assert from "assert";
 
 const txt = `Personaggio: Otello
@@ -58,4 +59,32 @@ assert.equal(sc[1].character, "LIDA");
 assert.equal(sc[1].text, "Oh, Lyngstrand! È dunque ritornato?");
 assert.equal(sc[2].text, "Niente di serio, come un'oppressione quando respiro");  // didascalia spezzata via
 assert.equal(parseScene("Personaggio: X\nBattuta: ciao")[0].text, "ciao");  // senza ** → formato campi
+
+// --- note di regia: corsivo, parentesi, didascalia isolata ---
+assert.equal(sc[0].notes, "si toglie il cappuccio entra Lida");  // corsivo → note, non testo
+assert.equal(sc[1].notes, "Lyngstrand monta il cavalletto. Indossa una giacca di velluto. si gira");
+//        ^ didascalia isolata (paragrafo suo) attaccata alla battuta successiva
+
+const tonde = `**WANGEL** (guarda il mare) Ti ho cercata tutto il giorno.
+
+(Entra Lyngstrand.)`;
+const tn = parseScreenplay(tonde);
+assert.equal(tn.length, 1);
+assert.equal(tn[0].text, "Ti ho cercata tutto il giorno.");
+assert.equal(tn[0].notes, "guarda il mare Entra Lyngstrand.");  // coda finale → ultima battuta
+
+// --- round-trip md: voce, emozione, velocità, pausa, note ---
+const scena = [
+  { character: "LINGSTRAND", voice_id: "Luca_confuso", emotion: null, speed: "1.1",
+    pause_after: 0.5, notes: "guarda il mare, esitante", text: "Niente di serio." },
+  { character: "ELLIDA", voice_id: "Ellida", emotion: "ironico", speed: "1.0",
+    pause_after: 0, notes: "", text: "Davvero?" },
+];
+const md = sceneToMarkdown(scena, "La donna del mare");
+const back = parseScene(md);
+assert.equal(back.length, 2);
+for (const k of ["character", "voice_id", "emotion", "speed", "pause_after", "notes", "text"])
+  assert.deepEqual(back.map((b) => b[k]), scena.map((b) => b[k]), `round-trip ${k}`);
+assert.ok(!md.includes("# La donna del mare\n**"), "titolo separato dalla prima battuta");
+assert.equal(parseScene(md)[0].text.includes("gassmann"), false);  // metadata fuori dal parlato
 console.log("ok");

@@ -49,7 +49,7 @@ python -m app.desktop                                               # finestra d
 `app/transcribe.py` (audio→ref_text), `app/desktop.py` (wrapper pywebview),
 `app/biochem_text_preprocessor.py` (preprocessing termini scientifici).
 
-**Tab UI:** Genera (singolo) · Batch (più testi, stessa voce) · **Teatro** (voci clone, neutre) · **Teatro-Emozioni** (voci design, Sesso→Voce→Emozione) · Voci.
+**Tab UI:** Genera (singolo) · Batch (più testi, stessa voce) · **Teatro** (voci clone + palette 🗣 `Nome_emozione`, note di regia, export .md) · **Teatro-Emozioni** (voci design, Sesso→Voce→Emozione) · Voci.
 
 **Endpoint principali:**
 - `GET /api/voices` · `POST /api/voices` (crea clone) · `GET /api/voices/{id}/sample`
@@ -69,11 +69,15 @@ imparare le battute di un monologo o dialogo a più voci alternate.
 **Campi di ogni speaker block:**
 - `character` — etichetta personaggio (solo visuale)
 - `voice_id` — voce (dropdown da `/api/voices`); le **varianti emotive** appaiono come
-  voci separate (`Sergio · triste`), value `id|emozione` → `emotion` derivata dal menu
+  voci separate (`Sergio · triste`), value `id|emozione` → `emotion` derivata dal menu.
+  Prima option vuota: una battuta senza voce non eredita in silenzio la prima della lista
+  (la generazione si ferma con "Assegna una voce a questa battuta")
 - `speed` — velocità: 0.8 / 0.9 / 1.0 / 1.1 / 1.2 (via librosa time-stretch)
-- `instruct` — istruzione libera, **solo voci design** (il modello clone la ignora).
-  In Teatro-Emozioni: **chip preset** (sussurrato/concitato/…) che si accodano al campo.
+- `instruct` — istruzione libera, **solo Teatro-Emozioni** (il modello clone la ignora,
+  quindi nel Teatro il campo non esiste più): **chip preset** che si accodano al campo.
 - `text` — la battuta
+- `notes` — **note di regia** (solo Teatro): popup 📝 `<dialog>`, editabili, salvate
+  nell'export ma **mai inviate al TTS** (`blockToApi` non le include)
 - `pause_after` — secondi di silenzio dopo la battuta nella scena
 - **Solo Teatro-Emozioni** — leve extra di resa: `temperature` (espressività, nativa
   modello), `pitch` (semitoni) e `gain` (dB) DSP post via `apply_dsp` in `pipeline.py`
@@ -103,11 +107,35 @@ Config voce con varianti emotive (esempio):
   "emotion_ref_texts": { "felice": "trascrizione del campione felice" } }
 ```
 
-**Output:** `pipeline.stitch_scene` concatena i clip in una traccia unica (con le pause)
-+ restituisce i clip singoli. Le scene si esportano/importano come JSON (impostazioni +
-testi, no audio) dalla UI.
+**Selezionatore voce (solo Teatro, `#t-picker` in `app.js`):** palette `position: fixed`
+che segue lo scroll. Bottone-testa 🗣 → elenco nomi; scelto il nome restano le sue
+**emozioni in chip alfabetiche**, finché non si riclicca la testa. Chip → **drag & drop**
+sulla battuta, oppure click sulla battuta (diventa `.selected`) + click sulla chip.
+Sotto i 1180px la palette torna in linea sopra la scena (media query).
 
-**Test:** `python -m pytest tests/` (21 test). Singoli runnabili anche come modulo:
+**Convenzione voci `Nome_emozione`** (`voiceGroups()` in `app.js`, solo frontend — l'id
+contiene già tutto, nessun campo nuovo nei config): nome = prima del **primo** `_`,
+emozione = il resto. Un **gruppo con un solo membro non è una variante**: `Lo_Straniero`,
+`Sergio`, `Lyngstrand` restano voci intere. Dati reali: `Luca` → 14 chip, `Ellida` →
+`base`/`2`/`ironica`. Le varianti da `emotion_samples` si aggiungono come chip con value
+`id|emozione` (già gestito da `parseVoice`). Per aggiungere emozioni: basta creare la
+voce `Nome_nuovaemozione` — la palette la mostra da sola.
+
+**Output:** `pipeline.stitch_scene` concatena i clip in una traccia unica (con le pause)
++ restituisce i clip singoli (wav/mp3 dal selettore Formato). Le scene si esportano in
+due formati (nessun audio dentro):
+- **JSON** — stato completo dei blocchi;
+- **`.md` copione** (`sceneToMarkdown` in `scene_parse.js`) — `**NOME**` + note di regia
+  in corsivo + battuta; voce/velocità/pausa in un commento `<!--gassmann: voce;vel;pausa-->`
+  invisibile in Obsidian → **reimport senza perdite**.
+
+L'import (`parseScene`) auto-rileva 3 formati: JSON esportato, **copione** (`**NOME**` +
+testo sulla stessa riga; corsivo `*…*`/`_…_` e parentesi `(…)` → `notes`, mai lette dal
+TTS; una didascalia isolata diventa nota della battuta successiva) e il formato a campi
+separati da `---`.
+
+**Test:** `python -m pytest tests/` (24 test) · parser scene:
+`node app/static/scene_parse.test.mjs`. Singoli runnabili anche come modulo:
 `python -m tests.test_stitch` (stitch) · `python -m tests.test_emotion` (DSP).
 
 ## Setup Ambiente

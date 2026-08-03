@@ -62,16 +62,30 @@
 
     <!-- TEATRO -->
     <section id="teatro" class="panel">
-      <p>Componi una scena: ogni blocco è una battuta con la sua voce e velocità. Per l'emozione scegli la variante della voce nel menu (es. <code>Sergio · triste</code>). L'output è una traccia unica + i clip singoli.</p>
+      <p>Componi una scena: ogni battuta ha voce, velocità e note di regia (📝, non lette dal TTS).
+         Le voci seguono la convenzione <code>Nome_emozione</code>: apri il 🗣 <strong>selezionatore voce</strong>
+         a lato, scegli il personaggio e trascina l'emozione sulla battuta (o clicca la battuta e poi l'emozione).
+         L'output è una traccia unica + i clip singoli.</p>
       <div class="row">
         <div><label>Nome scena</label><input id="t-title" type="text" value="scena"></div>
         <div><label>Formato</label><select id="t-format"><option>wav</option><option>mp3</option></select></div>
       </div>
+
+      <!-- selezionatore voce: fisso nella vista, segue lo scroll -->
+      <aside id="t-picker">
+        <button id="t-picker-head" title="Scegli la voce">🗣</button>
+        <div id="t-picker-body" class="hidden">
+          <div id="t-picker-names"></div>
+          <div id="t-picker-emos"></div>
+        </div>
+      </aside>
+
       <div id="t-blocks"></div>
       <div class="row" style="margin-top:.75rem">
         <button id="t-add">+ Aggiungi battuta</button>
-        <button id="t-export">⬇ Esporta scena</button>
-        <button id="t-import-btn" title="JSON esportato, oppure .txt/.md con battute separate da una riga '---'">⬆ Importa scena</button>
+        <button id="t-export">⬇ Esporta JSON</button>
+        <button id="t-export-md" title="Copione markdown: personaggio, note di regia e battute (voci e tempi in un commento invisibile)">⬇ Esporta .md</button>
+        <button id="t-import-btn" title="JSON esportato, copione .md (**NOME** + battuta) oppure .txt con battute separate da una riga '---'">⬆ Importa scena</button>
         <input id="t-import" type="file" accept=".json,.txt,.md,application/json,text/plain,text/markdown" class="hidden">
       </div>
       <button id="t-genall" class="genall" title="Genera tutte le battute da zero e le unisce nella scena">🎬 Genera scena completa</button>
@@ -111,29 +125,38 @@
     <!-- template blocco teatro (clonato da app.js) -->
     <template id="t-block-tpl">
       <div class="t-block">
-        <div class="row">
-          <div><label>Personaggio</label><input class="t-char" type="text" placeholder="es. AMLETO"></div>
-          <div><label>Voce</label><select class="t-voice"></select></div>
-          <div><label>Velocità</label><select class="t-speed">
+        <div class="t-head">
+          <div class="t-f t-f-char"><label>Personaggio</label>
+            <input class="t-char" type="text" placeholder="es. AMLETO"></div>
+          <div class="t-f t-f-voice"><label>Voce</label><select class="t-voice"></select></div>
+          <div class="t-f t-f-sm"><label>Velocità</label><select class="t-speed">
             <option value="0.8">0.8×</option><option value="0.9">0.9×</option>
             <option value="1.0" selected>1.0×</option>
             <option value="1.1">1.1×</option><option value="1.2">1.2×</option>
           </select></div>
-          <div><label>Pausa dopo (sec)</label><input class="t-pause" type="number" min="0" step="0.1" value="0.5"></div>
+          <div class="t-f t-f-sm"><label>Pausa (s)</label>
+            <input class="t-pause" type="number" min="0" step="0.1" value="0.5"></div>
+          <div class="t-f t-f-sm"><label>Note regia</label>
+            <button class="t-notes-btn" title="Indicazioni registiche — non lette dal TTS">📝</button></div>
         </div>
-        <label>Istruzione libera <small>(solo voci design)</small></label>
-        <input class="t-instruct" type="text" placeholder="es. sussurrando">
-        <label>Battuta</label>
-        <textarea class="t-text" rows="2" placeholder="testo della battuta…"></textarea>
-        <div class="row t-block-actions">
-          <button class="t-up" title="Su">↑</button>
-          <button class="t-down" title="Giù">↓</button>
-          <button class="t-dup" title="Duplica">⧉</button>
-          <button class="t-regen" title="Rigenera solo questa battuta">↻ Rigenera</button>
-          <button class="t-del" title="Elimina">✕</button>
+        <textarea class="t-text" rows="4" placeholder="testo della battuta…"></textarea>
+        <div class="t-foot">
+          <button class="t-regen" title="Genera / rigenera l'audio di questa battuta"></button>
+          <audio class="t-clip hidden" controls></audio>
+          <progress class="t-prog hidden"></progress>
+          <div class="t-tools">
+            <button class="t-down" title="Sposta giù">↓</button>
+            <button class="t-up" title="Sposta su">↑</button>
+            <button class="t-dup" title="Duplica">⧉</button>
+            <button class="t-del" title="Cancella">🗑</button>
+          </div>
         </div>
-        <progress class="t-prog hidden"></progress>
-        <audio class="t-clip hidden" controls></audio>
+        <dialog class="t-notes-dlg">
+          <h3>Note di regia</h3>
+          <p class="hint">Indicazioni registiche, beat attoriali… restano nel copione (e nell'export .md) ma non vengono trasformate in audio.</p>
+          <textarea class="t-notes" rows="8"></textarea>
+          <button class="t-notes-close primary">Chiudi</button>
+        </dialog>
       </div>
     </template>
 

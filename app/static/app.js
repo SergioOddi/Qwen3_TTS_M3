@@ -25,9 +25,39 @@ const parseVoice = (val) => {
   return i < 0 ? { voice_id: val, emotion: null }
                : { voice_id: val.slice(0, i), emotion: val.slice(i + 1) };
 };
-// Teatro: solo voci clone, neutre (niente varianti emotive nel menu)
-const cloneVoiceOptions = () => voicesCache.filter((v) => v.type === "clone")
-  .map((v) => `<option value="${esc(v.id)}">${esc(v.id)}</option>`).join("");
+// Teatro: solo voci clone (id + eventuali varianti da campione emotivo).
+// Prima option vuota: una battuta importata senza voce NON deve ereditare in
+// silenzio la prima della lista — deve saltare all'occhio che manca.
+const cloneVoices = () => voicesCache.filter((v) => v.type === "clone");
+const cloneVoiceOptions = () => [`<option value="">— scegli voce —</option>`].concat(
+  cloneVoices().flatMap((v) => [
+    `<option value="${esc(v.id)}">${esc(v.id)}</option>`,
+    ...(v.emotions || []).map((e) =>
+      `<option value="${esc(v.id)}|${esc(e)}">${esc(v.id)} · ${esc(e)}</option>`),
+  ])).join("");
+
+// Convenzione voci: "Nome_emozione" → nome prima del primo "_", emozione dopo.
+// Un gruppo con un solo membro NON è una variante (Lo_Straniero, Sergio…): resta
+// una voce intera. Ritorna [{ name, chips: [{ label, value }] }] per la palette.
+function voiceGroups() {
+  const by = new Map();
+  for (const v of cloneVoices()) {
+    const i = v.id.indexOf("_");
+    const name = i < 0 ? v.id : v.id.slice(0, i);
+    (by.get(name) ?? by.set(name, []).get(name)).push(v);
+  }
+  const chips = (v, group) => [
+    { label: group && v.id !== group ? v.id.slice(group.length + 1) : "base", value: v.id },
+    ...(v.emotions || []).map((e) => ({ label: e, value: `${v.id}|${e}` })),
+  ];
+  const cmp = (a, b) => a.localeCompare(b, "it", { sensitivity: "base" });
+  return [...by]
+    .map(([name, vs]) => vs.length === 1 && vs[0].id !== name
+      ? { name: vs[0].id, chips: chips(vs[0], null) }
+      : { name, chips: vs.flatMap((v) => chips(v, name)) })
+    .map((g) => ({ ...g, chips: g.chips.sort((a, b) => cmp(a.label, b.label)) }))
+    .sort((a, b) => cmp(a.name, b.name));
+}
 // Teatro-Emozioni: voci design filtrate per sesso
 const designVoicesByGender = (g) =>
   voicesCache.filter((v) => v.type === "design" && v.gender === g);
@@ -44,6 +74,7 @@ async function loadVoices() {
     .map((v) => `<option value="${esc(v.id)}">${esc(v.id)}${v.emotions.length ? " ["+v.emotions.join(",")+"]" : ""}</option>`).join("");
   teatro.repopulateVoices();
   teatroEmo.repopulateVoices();
+  renderPicker();
   renderVoiceCards();
   updateGenPreview();
 }
@@ -233,9 +264,11 @@ function makeTeatro({ prefix, fillVoiceUI, readVoice }) {
     fillVoiceUI(el, data);
     if (data.character != null) cls(el, "char").value = data.character;
     if (data.speed != null) cls(el, "speed").value = String(data.speed);
-    if (data.instruct != null) cls(el, "instruct").value = data.instruct;
+    if (data.instruct != null && cls(el, "instruct")) cls(el, "instruct").value = data.instruct;
     if (data.pause_after != null) cls(el, "pause").value = data.pause_after;
     if (data.text != null) cls(el, "text").value = data.text;
+    if (data.notes != null && cls(el, "notes")) cls(el, "notes").value = data.notes;
+    bindNotes(el);
     cls(el, "del").onclick = () => el.remove();
     cls(el, "dup").onclick = () => el.after(addBlock(readBlock(el)));
     cls(el, "up").onclick = () => el.previousElementSibling?.before(el);
@@ -251,6 +284,18 @@ function makeTeatro({ prefix, fillVoiceUI, readVoice }) {
     return el;
   }
 
+  // Note di regia: popup nativo <dialog> (ESC + backdrop gratis). Solo Teatro ce l'ha.
+  function bindNotes(el) {
+    const btn = cls(el, "notes-btn");
+    if (!btn) return;
+    const dlg = cls(el, "notes-dlg");
+    const mark = () => btn.classList.toggle("has", !!cls(el, "notes").value.trim());
+    btn.onclick = () => dlg.showModal();
+    cls(el, "notes-close").onclick = () => dlg.close();
+    dlg.onclose = mark;
+    mark();
+  }
+
   function readBlock(div) {
     const v = readVoice(div);  // { voice_id, emotion, [temperature, pitch, gain] }
     const clipEl = cls(div, "clip");
@@ -261,9 +306,10 @@ function makeTeatro({ prefix, fillVoiceUI, readVoice }) {
       character: cls(div, "char").value.trim(),
       ...v,
       speed: parseFloat(cls(div, "speed").value),
-      instruct: cls(div, "instruct").value.trim(),
+      instruct: cls(div, "instruct")?.value.trim() ?? "",
       pause_after: parseFloat(cls(div, "pause").value) || 0,
       text: cls(div, "text").value.trim(),
+      notes: cls(div, "notes")?.value.trim() ?? "",   // regia: mai inviata al TTS
       clip,
     };
   }
@@ -278,6 +324,7 @@ function makeTeatro({ prefix, fillVoiceUI, readVoice }) {
   async function regenBlock(div, shouldStop) {
     const b = readBlock(div);
     if (!b.text) { setStatus(P("status"), "Battuta vuota", "err"); return false; }
+    if (!b.voice_id) { setStatus(P("status"), "Assegna una voce a questa battuta", "err"); return false; }
     setStatus(P("status"), "Rigenero battuta…", "");
     const clip = cls(div, "clip");
     const prog = cls(div, "prog");
@@ -396,19 +443,15 @@ function makeTeatro({ prefix, fillVoiceUI, readVoice }) {
     if (!P("blocks").children.length) addBlock();
   }
 
+  const readAll = () => [...P("blocks").querySelectorAll(`.${prefix}-block`)].map(readBlock);
+
   // wiring controlli del pannello
   P("add").onclick = () => addBlock();
   P("stop").onclick = () => { stopScene = true; setStatus(P("status"), "Interruzione…", ""); };
   P("genall").onclick = genAll;
   P("run").onclick = stitchScene;
-  P("export").onclick = () => {
-    const data = [...P("blocks").querySelectorAll(`.${prefix}-block`)].map(readBlock);
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = (P("title").value || "scena") + ".json";
-    a.click();
-  };
+  P("export").onclick = () =>
+    download(JSON.stringify(readAll(), null, 2), (P("title").value || "scena") + ".json");
   P("import-btn").onclick = () => P("import").click();
   P("import").onchange = async (e) => {
     const file = e.target.files[0];
@@ -433,21 +476,113 @@ function makeTeatro({ prefix, fillVoiceUI, readVoice }) {
     e.target.value = "";
   };
 
-  return { addBlock, repopulateVoices };
+  return { addBlock, repopulateVoices, readAll };
 }
 
-// Istanza Teatro: solo voci clone, neutre
+function download(text, filename) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text]));
+  a.download = filename;
+  a.click();
+}
+
+// Istanza Teatro: solo voci clone; la voce arriva dal menu o dalla palette (drag/click)
 const teatro = makeTeatro({
   prefix: "t",
   fillVoiceUI(el, data) {
     const s = el.querySelector(".t-voice");
     s.innerHTML = cloneVoiceOptions();
-    if (data.voice_id) s.value = data.voice_id;
+    if (data.voice_id) s.value = data.emotion ? `${data.voice_id}|${data.emotion}` : data.voice_id;
+    // bersaglio del drag&drop della palette (on* = ribindabile senza duplicati)
+    el.ondragover = (e) => { e.preventDefault(); el.classList.add("drop-hover"); };
+    el.ondragleave = () => el.classList.remove("drop-hover");
+    el.ondrop = (e) => {
+      e.preventDefault();
+      el.classList.remove("drop-hover");
+      assignVoice(el, e.dataTransfer.getData("text/plain"));
+    };
   },
-  readVoice(el) {
-    return { voice_id: el.querySelector(".t-voice").value, emotion: null };
-  },
+  readVoice: (el) => parseVoice(el.querySelector(".t-voice").value),
 });
+
+// --- Selezionatore voce (palette fissa del Teatro) ---
+// Testa 🗣 → elenco nomi; scelto il nome restano le sue emozioni, finché non si
+// riclicca la testa. Chip → drag sulla battuta, oppure click sulla battuta selezionata.
+const picker = { name: null, open: false };
+
+function renderPicker() {
+  const groups = voiceGroups();
+  const names = $("#t-picker-names");
+  names.innerHTML = groups.map((g) =>
+    `<button class="pk-name${g.name === picker.name ? " active" : ""}"
+             data-name="${esc(g.name)}">${esc(g.name)}</button>`).join("");
+  names.classList.toggle("hidden", !picker.open);
+  const g = groups.find((x) => x.name === picker.name);
+  $("#t-picker-emos").innerHTML = g ? targetLabel() + `<div class="pk-current">${esc(g.name)}</div>` +
+    g.chips.map((c) => `<button class="pk-chip" draggable="true"
+       data-value="${esc(c.value)}" title="${esc(c.value)}">${esc(c.label)}</button>`).join("") : "";
+  const tgt = $("#t-picker-emos .pk-target");
+  if (tgt) tgt.onclick = () => selectedBlock()?.scrollIntoView({ block: "center", behavior: "smooth" });
+  $("#t-picker-body").classList.toggle("hidden", !picker.open && !g);
+  names.querySelectorAll(".pk-name").forEach((b) => b.onclick = () => {
+    picker.name = b.dataset.name; picker.open = false; renderPicker();
+  });
+  $$("#t-picker-emos .pk-chip").forEach((c) => {
+    c.ondragstart = (e) => e.dataTransfer.setData("text/plain", c.dataset.value);
+    c.onclick = () => assignVoice(selectedBlock(), c.dataset.value);
+  });
+}
+
+$("#t-picker-head").onclick = () => { picker.open = !picker.open; renderPicker(); };
+
+function assignVoice(el, value) {
+  if (!el || !value) return;
+  const sel = el.querySelector(".t-voice");
+  sel.value = value;
+  if (sel.value !== value) {
+    setStatus("#t-status", `Voce non disponibile: ${value}`, "err");
+    return;
+  }
+  el.classList.add("flash");
+  setTimeout(() => el.classList.remove("flash"), 500);
+  selectBlock(el);
+}
+
+// La battuta "corrente" = l'ultima toccata (click o focus): il click sulla chip va lì
+function selectBlock(el) {
+  if (!el) return;
+  $$("#t-blocks .t-block.selected").forEach((x) => x.classList.remove("selected"));
+  el.classList.add("selected");
+  updateTarget();
+}
+const selectedBlock = () => $("#t-blocks .t-block.selected") || $("#t-blocks .t-block");
+
+// Etichetta "dove finirà la chip": numero battuta + personaggio, cliccabile per saltarci
+function targetLabel() {
+  const el = selectedBlock();
+  if (!el) return "";
+  const n = [...$$("#t-blocks .t-block")].indexOf(el) + 1;
+  const who = el.querySelector(".t-char").value.trim();
+  return `<div class="pk-target" title="Vai alla battuta">→ <b>BATTUTA ` +
+         `${String(n).padStart(3, "0")}</b>${who ? " · " + esc(who) : ""}</div>`;
+}
+function updateTarget() {
+  const box = $("#t-picker-emos");
+  const old = box.querySelector(".pk-target");
+  if (!old) return;                      // nessuna voce scelta: niente da aggiornare
+  old.outerHTML = targetLabel();
+  box.querySelector(".pk-target").onclick =
+    () => selectedBlock()?.scrollIntoView({ block: "center", behavior: "smooth" });
+}
+for (const ev of ["click", "focusin"]) {
+  $("#t-blocks").addEventListener(ev, (e) => selectBlock(e.target.closest(".t-block")));
+}
+$("#t-blocks").addEventListener("input", updateTarget);   // personaggio rinominato
+
+$("#t-export-md").onclick = () => {
+  const title = $("#t-title").value || "scena";
+  download(sceneToMarkdown(teatro.readAll(), title), title + ".md");
+};
 
 // Istanza Teatro-Emozioni: voci design + sesso + emozione
 const teatroEmo = makeTeatro({
