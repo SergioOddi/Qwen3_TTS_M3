@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Source+Serif+4:wght@600;700&display=swap');
 :root {
   --bg: #F6F0E7; --panel: #FFFDF8; --accent: #B7C9A8; --text: #2E2A22;
   --muted: #8a8272; --border: #E3D9C6; --ok: #7FA66B; --err: #C97B5A;
@@ -6,7 +7,10 @@
 * { box-sizing: border-box; }
 body {
   margin: 0; background: var(--bg); color: var(--text);
-  font-family: -apple-system, system-ui, sans-serif; line-height: 1.5;
+  font-family: 'Atkinson Hyperlegible', -apple-system, system-ui, sans-serif; line-height: 1.5;
+}
+h1, h2, h3, .t-block::before, .te-block::before {
+  font-family: 'Source Serif 4', Georgia, serif;
 }
 header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); }
 h1 { margin: 0 0 .75rem; font-size: 1.3rem; }
