@@ -165,6 +165,8 @@ def create_clone(name, language, audio_bytes, ref_text, instruct="", tags=None):
     if not ref_text or not ref_text.strip():
         raise ValueError("ref_text obbligatorio per una voce clonata")
     slug = slugify(name)
+    if (appconfig.CONFIG_DIR / f"{slug}.json").exists():
+        raise ValueError(f"voce '{slug}' esiste già: scegli un altro nome")
     sample_path = appconfig.SAMPLES_DIR / f"{slug}.wav"
     _to_wav_24k_mono(audio_bytes, sample_path)
 

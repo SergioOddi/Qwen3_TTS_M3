@@ -31,23 +31,9 @@ Tutto in locale e offline. Prima generazione più lenta (caricamento modello).
 
 ## ⚡ Esempi Rapidi
 
-### Converti Testo in Audio
-```bash
-echo "Benvenuto al sistema TTS" > INPUT/test.txt
-python src/generate_audio.py -i INPUT/test.txt
-```
-
-### Usa Voce Clonata
-```bash
-# Voce Sermonti Narratore
-python src/generate_cloned_audio.py -i INPUT/testo.txt -c config/sermonti_narratore.json
-
-# Voce Gazzolo Docente
-python src/generate_cloned_audio.py -i INPUT/testo.txt -c config/gazzolo_docente.json
-
-# Voce Capone Narratore
-python src/generate_cloned_audio.py -i INPUT/testo.txt -c config/capone_narratore.json
-```
+Tutto passa dall'app GASSMANN (`./launch.sh`, tab **Genera**): scrivi/incolla il
+testo, scegli la voce dal menu (incluse le voci clonate come Sermonti, Gazzolo,
+Capone) e genera. Vedi [TESTO_IN_VOCE.md](TESTO_IN_VOCE.md) per la guida passo passo.
 
 
 
@@ -76,21 +62,9 @@ Il setup installa automaticamente tutte le dipendenze e scarica i modelli (~10GB
 
 ## 📝 Utilizzo Base
 
-### 1. Crea un file di testo
-
-```bash
-echo "Benvenuto al sistema di sintesi vocale. Questo è un test." > INPUT/mio_testo.txt
-```
-
-### 2. Genera l'audio
-
-```bash
-python src/generate_audio.py -i INPUT/mio_testo.txt
-```
-
-### 3. Trova l'audio generato
-
-Il file audio sarà in `OUTPUT/mio_testo.wav`
+1. Apri l'app (`./launch.sh`), tab **Genera**
+2. Scrivi/incolla il testo, scegli voce e formato (wav/mp3)
+3. Genera → scarica il file da **Output** o dalla lista risultati
 
 **È così semplice!**
 
@@ -98,15 +72,8 @@ Il file audio sarà in `OUTPUT/mio_testo.wav`
 
 ## 🎯 Elaborazione Batch
 
-Converti tutti i file `.txt` nella cartella INPUT in un colpo solo:
-
-```bash
-# Processa tutti i file
-python src/batch_process.py
-
-# Con configurazione voce specifica
-python src/batch_process.py -c config/voice_config_female.json
-```
+Tab **Batch** dell'app: incolla più testi (uno per riga o blocco), scegli una
+voce comune, genera tutti in coda.
 
 ---
 
@@ -135,37 +102,19 @@ Usa `-c config/nome_file.json` per personalizzare la voce:
 
 ### Esempio 1: Generazione Semplice
 
-```bash
-# Crea testo
-echo "La biochimica è lo studio delle reazioni chimiche negli organismi viventi." > INPUT/lezione.txt
-
-# Genera con voce maschile italiana
-python src/generate_audio.py -i INPUT/lezione.txt
-
-# Output: OUTPUT/lezione.wav
-```
+Tab **Genera** → incolla "La biochimica è lo studio delle reazioni chimiche
+negli organismi viventi." → scegli una voce italiana → Genera.
 
 ### Esempio 2: Cambiare Voce
 
-```bash
-# Voce femminile
-python src/generate_audio.py -i INPUT/lezione.txt -c config/voice_config_female.json
-
-# Voce clonata (Gazzolo)
-python src/generate_audio.py -i INPUT/lezione.txt -c config/gazzolo_docente.json
-
-# Voce inglese
-python src/generate_audio.py -i INPUT/testo_en.txt -c config/voice_config_english.json
-```
+Stesso testo, cambia solo la voce dal menu a tendina (femminile, clonata
+Gazzolo, inglese per testo EN, ecc.) — nessun comando da riscrivere.
 
 ### Esempio 3: Lezioni di Biochimica
 
-```bash
-# Usa preprocessor per termini scientifici + voce docente
-python src/generate_biochem_lecture.py -i INPUT/biochimica.txt -c config/gazzolo_docente.json
-```
-
-Il preprocessor corregge automaticamente la pronuncia di termini come "ATP", "NADH", "enzima", ecc.
+Tab **Genera**, opzione **Biochim** attiva: corregge automaticamente la
+pronuncia di termini come "ATP", "NADH", "enzima", ecc. (vedi
+[docs/BIOCHEMISTRY_TTS_GUIDE.md](docs/BIOCHEMISTRY_TTS_GUIDE.md)).
 
 ---
 
@@ -183,31 +132,13 @@ Crea un nuovo file in `config/mia_voce.json`:
 }
 ```
 
-Poi usalo:
-```bash
-python src/generate_audio.py -i INPUT/testo.txt -c config/mia_voce.json
-```
+Poi selezionala dal menu voci nell'app (compare in automatico leggendo `config/`).
 
 ### Voice Cloning (clona una voce reale)
 
-1. Metti un campione audio (5-10 secondi) in `VOICE_SAMPLES/mia_voce.wav`
-2. Crea config `config/mia_voce.json`:
-
-```json
-{
-  "mode": "voice_clone",
-  "language": "Italian",
-  "voice_name": "mia_voce",
-  "prompt_speech_path": "VOICE_SAMPLES/mia_voce.wav",
-  "ref_text": "Trascrizione esatta del campione audio",
-  "output_format": "wav"
-}
-```
-
-3. Usa:
-```bash
-python src/generate_cloned_audio.py -i INPUT/testo.txt -c config/mia_voce.json
-```
+Tab **Voci** dell'app: registra dal microfono o carica un file (5-10s),
+trascrizione automatica o manuale del `ref_text`, salva → la voce è pronta
+in Genera/Batch/Teatro. Vedi [CLONAZIONE_VOCE.md](CLONAZIONE_VOCE.md).
 
 ---
 
@@ -219,7 +150,7 @@ TTS_M3/
 ├── OUTPUT/             # Trovi qui gli audio generati (.wav/.mp3)
 ├── config/             # Configurazioni voci (personalizza qui)
 ├── VOICE_SAMPLES/      # Campioni audio per voice cloning
-├── src/                # Codice sorgente (non modificare)
+├── app/                # Web app GASSMANN (FastAPI + UI + pipeline)
 ├── scripts/            # Script di setup e utilità
 ├── docs/               # Documentazione completa
 └── models/             # Cache modelli (auto-download)
@@ -256,7 +187,7 @@ brew install ffmpeg
 
 ### Errore "device_map"
 
-Se hai problemi con GPU, modifica `src/generate_audio.py` e cambia `device_map="mps"` in `device_map="cpu"`.
+Se hai problemi con GPU, modifica `app/model_manager.py` e cambia `device_map="mps"` in `device_map="cpu"`.
 
 ---
 

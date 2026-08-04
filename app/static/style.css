@@ -150,7 +150,8 @@ a[download] { display: inline-block; margin-top: .5rem; color: var(--accent); }
 .t-notes-dlg textarea { width: 100%; }
 
 /* --- Selezionatore voce: fisso nella vista, segue lo scroll --- */
-#t-picker { position: fixed; left: 200px; top: 1.5rem; width: 178px; z-index: 5; }
+#t-picker { position: fixed; left: 190px; top: 1.5rem; width: 178px; z-index: 5; border-right: none; }
+#teatro { padding-left: 2rem; }
 #t-picker-head {
   width: 56px; height: 56px; border-radius: 50%; font-size: 1.5rem; padding: 0;
   background: var(--panel); border: 2px solid var(--accent);
@@ -184,7 +185,7 @@ a[download] { display: inline-block; margin-top: .5rem; color: var(--accent); }
               display: flex; gap: .6rem; align-items: flex-end; }
   #t-picker-body { margin-top: 0; flex: 1; max-height: 32vh; }
   #t-picker-names { flex-direction: row; flex-wrap: wrap; }
-  #teatro { padding-bottom: 6rem; }   /* la striscia non copre l'ultima battuta */
+  #teatro { padding-bottom: 6rem; padding-left: 0; }   /* la striscia non copre l'ultima battuta */
 }
 @media (max-width: 1180px) {
   body { flex-direction: column; }

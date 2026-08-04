@@ -121,14 +121,9 @@ def test_file_structure():
     print("─" * 50)
 
     import os
-    from pathlib import Path
 
-    required_dirs = ['INPUT', 'OUTPUT', 'config', 'src', 'models']
-    required_files = [
-        'config/voice_config.json',
-        'src/generate_audio.py',
-        'src/batch_process.py',
-    ]
+    required_dirs = ['INPUT', 'OUTPUT', 'config', 'app', 'VOICE_SAMPLES']
+    required_files = ['app/main.py', 'app/pipeline.py', 'app/voices.py']
 
     all_ok = True
 
@@ -150,7 +145,7 @@ def test_file_structure():
 
 
 def test_config_files():
-    """Verifica validità file di configurazione."""
+    """Verifica validità file di configurazione (voice_clone o voice_design)."""
     print("\n🧪 Test 5: File di configurazione")
     print("─" * 50)
 
@@ -165,15 +160,18 @@ def test_config_files():
             with open(config_file, 'r') as f:
                 config = json.load(f)
 
-            # Verifica campi richiesti
-            required_fields = ['language', 'voice_description', 'output_format']
+            mode = config.get('mode', 'voice_design' if 'voice_description' in config else 'voice_clone')
+            if mode == 'voice_clone':
+                required_fields = ['language', 'prompt_speech_path', 'ref_text', 'output_format']
+            else:
+                required_fields = ['language', 'voice_description', 'output_format']
             missing = [f for f in required_fields if f not in config]
 
             if missing:
                 print(f"⚠ {config_file.name}: campi mancanti: {missing}")
                 all_ok = False
             else:
-                print(f"✓ {config_file.name}: valido")
+                print(f"✓ {config_file.name}: valido ({mode})")
                 print(f"  - Lingua: {config['language']}")
                 print(f"  - Formato: {config['output_format']}")
 
@@ -205,7 +203,7 @@ def print_summary(results):
         print("✅ Sistema pronto all'uso!")
         print("\n📝 Prossimi passi:")
         print("1. conda activate qwen3-tts")
-        print("2. python src/generate_audio.py -i INPUT/esempio.txt")
+        print("2. uvicorn app.main:create_app --factory --host 127.0.0.1 --port 8000")
     else:
         print("❌ Alcuni componenti critici mancanti")
         print("\n🔧 Azioni richieste:")

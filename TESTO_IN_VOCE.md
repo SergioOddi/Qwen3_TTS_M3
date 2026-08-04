@@ -1,37 +1,24 @@
 # 📝 Testo in Voce - Guida Pratica
 
-Questa guida ti spiega come convertire un testo in audio in modo semplice e veloce.
-
-## Lettura testo inglese da SPEAKER INGLESE_002b
-#per un buon tts di testo da slide di una lezione un ottimo modello è questo: 
-python src/batch_clone_process.py -c config/INGLESE_002i.json
-
-
-
-
+Questa guida ti spiega come convertire un testo in audio usando l'app GASSMANN.
 
 ---
 
 ## ⚡ Quick Start (2 passi)
 
-### 1️⃣ Crea un File di Testo
+### 1️⃣ Avvia l'app
 
 ```bash
-echo "Benvenuto al sistema di sintesi vocale. Questo è un test." > INPUT/mio_testo.txt
+./launch.sh
 ```
 
-O copia un file esistente:
-```bash
-cp ~/Documents/testo.txt INPUT/
-```
+Si apre su `http://127.0.0.1:8000`.
 
-### 2️⃣ Genera l'Audio
+### 2️⃣ Genera l'audio
 
-```bash
-python src/generate_audio.py -i INPUT/mio_testo.txt
-```
+Tab **Genera** → incolla o scrivi il testo → scegli voce e formato (wav/mp3) → **Genera**.
 
-**Output**: `OUTPUT/mio_testo.wav`
+**Output**: scaricabile dal player o dalla cartella `OUTPUT/`.
 
 **È così semplice!** 🎉
 
@@ -39,118 +26,32 @@ python src/generate_audio.py -i INPUT/mio_testo.txt
 
 ## 🎤 Cambiare Voce
 
-Usa `-c config/voce.json` per personalizzare la voce.
-
-### Voci Maschili Italiane
-
-```bash
-# Voce professionale (default)
-python src/generate_audio.py -i INPUT/testo.txt -c config/voice_config.json
-
-# Voce narratore
-python src/generate_audio.py -i INPUT/testo.txt -c config/voice_config_narratore.json
-
-# Voce documentaristica
-python src/generate_audio.py -i INPUT/testo.txt -c config/voice_config_narratore_documentaristico.json
-```
-
-### Voci Femminili Italiane
-
-```bash
-# Voce femminile professionale
-python src/generate_audio.py -i INPUT/testo.txt -c config/voice_config_female.json
-
-# Voce giovane ed energica
-python src/generate_audio.py -i INPUT/testo.txt -c config/voice_config_narratrice_giovane.json
-
-# Voce matura ed elegante
-python src/generate_audio.py -i INPUT/testo.txt -c config/voice_config_narratrice_elegante.json
-```
-
-### Voci Inglesi
-
-```bash
-# Voce maschile professionale
-python src/generate_audio.py -i INPUT/english_text.txt -c config/voice_config_english.json
-
-# Voce documentaristica BBC-style
-python src/generate_audio.py -i INPUT/english_text.txt -c config/voice_config_narrator_documentary_en.json
-```
+Il menu voci nella tab Genera elenca sia le voci **Voice Design** (descrizione
+testuale) sia le voci **clonate** (vedi [CLONAZIONE_VOCE.md](CLONAZIONE_VOCE.md)).
+Cambiarla è un click sul menu a tendina — nessun file da modificare.
 
 ---
 
 ## 📚 Elaborazione Batch
 
-Converti tutti i file `.txt` nella cartella INPUT in un colpo solo.
-
-```bash
-# Usa voce default
-python src/batch_process.py
-
-# Con voce specifica
-python src/batch_process.py -c config/voice_config_female.json
-```
-
-**Nota**: Il modello viene caricato una sola volta, rendendo il batch molto veloce.
+Tab **Batch**: incolla più testi (uno per blocco), scegli una voce comune,
+genera tutti in coda. Il modello resta caricato in memoria, quindi il batch è
+molto più rapido della prima generazione.
 
 ---
 
-## 🎯 Esempi Pratici
+## 🎭 Teatro (dialoghi multi-voce)
 
-### Esempio 1: Audiolibro Semplice
-
-```bash
-# 1. Crea il testo
-cat > INPUT/storia.txt << 'EOF'
-C'era una volta, in un piccolo villaggio di montagna,
-un vecchio saggio che conosceva i segreti della natura.
-Ogni giorno, al tramonto, raccontava storie ai bambini del paese.
-EOF
-
-# 2. Genera audio con voce narratore
-python src/generate_audio.py -i INPUT/storia.txt -c config/voice_config_narratore.json
-
-# Output: OUTPUT/storia.wav
-```
-
-### Esempio 2: Lezione Scientifica
-
-```bash
-# 1. Crea testo lezione
-echo "La biochimica studia le reazioni chimiche negli organismi viventi.
-Gli enzimi sono catalizzatori biologici che accelerano le reazioni metaboliche." > INPUT/lezione_biochimica.txt
-
-# 2. Genera con preprocessor scientifico
-python src/generate_biochem_lecture.py -i INPUT/lezione_biochimica.txt
-
-# Output: OUTPUT/lezione_biochimica.wav
-```
-
-Il preprocessor corregge automaticamente la pronuncia di termini scientifici (ATP, DNA, enzimi, ecc.).
-
-### Esempio 3: Contenuto Multi-Lingua
-
-```bash
-# Testo italiano
-echo "Ciao, benvenuto!" > INPUT/italiano.txt
-python src/generate_audio.py -i INPUT/italiano.txt -c config/voice_config.json
-
-# Testo inglese
-echo "Hello, welcome!" > INPUT/english.txt
-python src/generate_audio.py -i INPUT/english.txt -c config/voice_config_english.json
-
-# Testo spagnolo
-echo "Hola, bienvenido!" > INPUT/spanish.txt
-python src/generate_audio.py -i INPUT/spanish.txt -c config/voice_config_spanish.json
-```
+Per monologhi o scene con più personaggi/voci alternate, usa la tab **Teatro**
+(voci clonate) o **Teatro-Emozioni** (voci design con controllo emozione).
+Dettagli completi nel [CLAUDE.md](CLAUDE.md#funzione-teatro).
 
 ---
 
-## 🔧 Personalizza la Voce
+## 🔧 Personalizza una Voce Design
 
-### Crea una Nuova Configurazione
-
-Crea un file JSON in `config/mia_voce_custom.json`:
+Le voci Voice Design sono descritte a testo. Per crearne una nuova, aggiungi
+un file in `config/mia_voce_custom.json`:
 
 ```json
 {
@@ -161,10 +62,7 @@ Crea un file JSON in `config/mia_voce_custom.json`:
 }
 ```
 
-Poi usalo:
-```bash
-python src/generate_audio.py -i INPUT/testo.txt -c config/mia_voce_custom.json
-```
+Ricaricando l'app la voce compare da sola nel menu (letta da `config/`).
 
 ### Esempi di Voice Description
 
@@ -192,113 +90,35 @@ python src/generate_audio.py -i INPUT/testo.txt -c config/mia_voce_custom.json
 
 ## 🌍 Lingue Supportate
 
-Il sistema supporta 10 lingue:
+| Lingua | Codice |
+|--------|--------|
+| 🇮🇹 Italiano | `Italian` |
+| 🇬🇧 Inglese | `English` |
+| 🇪🇸 Spagnolo | `Spanish` |
+| 🇫🇷 Francese | `French` |
+| 🇩🇪 Tedesco | `German` |
+| 🇵🇹 Portoghese | `Portuguese` |
+| 🇷🇺 Russo | `Russian` |
+| 🇨🇳 Cinese | `Chinese` |
+| 🇯🇵 Giapponese | `Japanese` |
+| 🇰🇷 Coreano | `Korean` |
 
-| Lingua | Codice | Esempio Configurazione |
-|--------|--------|------------------------|
-| 🇮🇹 Italiano | `Italian` | `config/voice_config.json` |
-| 🇬🇧 Inglese | `English` | `config/voice_config_english.json` |
-| 🇪🇸 Spagnolo | `Spanish` | `config/voice_config_spanish.json` |
-| 🇫🇷 Francese | `French` | - |
-| 🇩🇪 Tedesco | `German` | - |
-| 🇵🇹 Portoghese | `Portuguese` | - |
-| 🇷🇺 Russo | `Russian` | - |
-| 🇨🇳 Cinese | `Chinese` | - |
-| 🇯🇵 Giapponese | `Japanese` | - |
-| 🇰🇷 Coreano | `Korean` | - |
-
-**Nota**: Specifica sempre la lingua nel file di configurazione per miglior qualità.
+**Nota**: specifica sempre la lingua per la miglior qualità.
 
 ---
 
-## 📁 Organizzazione File
+## 🎓 Lezioni Scientifiche/Biochimica
 
-### Struttura Consigliata
+Nella tab Genera attiva l'opzione **Biochim**: corregge automaticamente la
+pronuncia di termini come:
 
-```
-TTS_M3/
-├── INPUT/                  # I tuoi file di testo (.txt)
-│   ├── capitolo1.txt
-│   ├── capitolo2.txt
-│   └── lezione_biochimica.txt
-│
-├── OUTPUT/                 # Audio generati (.wav)
-│   ├── capitolo1.wav
-│   ├── capitolo2.wav
-│   └── lezione_biochimica.wav
-│
-└── config/                 # Configurazioni voci
-    ├── voice_config.json
-    └── mia_voce_custom.json
-```
-
-### Workflow Tipo
-
-```bash
-# 1. Metti testi in INPUT/
-cp ~/Documents/*.txt INPUT/
-
-# 2. Scegli voce (o usa default)
-# 3. Genera tutto in batch
-python src/batch_process.py -c config/voice_config_narratore.json
-
-# 4. Trova audio in OUTPUT/
-ls -la OUTPUT/
-```
-
----
-
-## ⚡ Performance
-
-Su **MacBook Pro M3 Max (36GB RAM)**:
-
-- **Prima generazione**: ~1-2 secondi (caricamento modello)
-- **Generazioni successive**: Quasi istantanee in streaming
-- **Batch processing**: Molto veloce (modello caricato una volta)
-- **Uso RAM**: ~5-8GB
-- **100% offline**: Funziona senza internet
-
----
-
-## 🎓 Casi d'Uso Speciali
-
-### Lezioni Scientifiche/Biochimica
-
-```bash
-# Usa il preprocessor per termini scientifici
-python src/generate_biochem_lecture.py -i INPUT/lezione.txt -c config/voice_config.json
-
-# Preview del preprocessing senza generare audio
-python src/generate_biochem_lecture.py -i INPUT/lezione.txt -o dummy.wav --preview-preprocessing
-```
-
-**Termini corretti automaticamente:**
 - ATP → "A-T-P"
 - DNA → "D-N-A"
 - NADH → "N-A-D-H"
 - pH → "pi-acca"
-- Enzima, proteina, glucosio (pronuncia corretta)
+- enzima, proteina, glucosio (pronuncia corretta)
 
 Vedi [docs/BIOCHEMISTRY_TTS_GUIDE.md](docs/BIOCHEMISTRY_TTS_GUIDE.md) per la guida completa.
-
----
-
-## 🔄 Convertire WAV in MP3
-
-```bash
-# Installa ffmpeg (se non già installato)
-brew install ffmpeg
-
-# Converti manualmente
-ffmpeg -i OUTPUT/audio.wav -b:a 192k OUTPUT/audio.mp3
-```
-
-O usa pydub in Python:
-```python
-from pydub import AudioSegment
-audio = AudioSegment.from_wav("OUTPUT/audio.wav")
-audio.export("OUTPUT/audio.mp3", format="mp3", bitrate="192k")
-```
 
 ---
 
@@ -307,53 +127,26 @@ audio.export("OUTPUT/audio.mp3", format="mp3", bitrate="192k")
 ### Il modello non si scarica
 
 ```bash
-# Download manuale
 pip install -U modelscope
 modelscope download --model Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign --local_dir ./models/Qwen3-TTS-12Hz-1.7B-VoiceDesign
 ```
 
-### Errore "device_map"
+### Errore GPU / "device_map"
 
-Se hai problemi con GPU, modifica `src/generate_audio.py`:
-```python
-device_map="cpu"  # invece di "mps"
-```
+Se hai problemi con MPS, modifica `app/model_manager.py` e cambia
+`device_map="mps"` in `device_map="cpu"`.
 
 ### Conversione MP3 fallisce
 
 ```bash
-# Installa ffmpeg
 brew install ffmpeg
 ```
 
 ### Voce non naturale
 
-- Prova configurazioni diverse
-- Aumenta dettagli in `voice_description`
-- Usa preprocessing per termini tecnici
-
----
-
-## 🎨 Configurazioni Voci Disponibili
-
-### Voice Design (Descrizione Testuale)
-
-| File | Lingua | Tipo | Descrizione |
-|------|--------|------|-------------|
-| `voice_config.json` | IT | Maschile | Professionale generale |
-| `voice_config_female.json` | IT | Femminile | Energica e amichevole |
-| `voice_config_narratore.json` | IT | Maschile | Narratore professionale |
-| `voice_config_narratore_documentaristico.json` | IT | Maschile | Stile documentario |
-| `voice_config_narratrice_giovane.json` | IT | Femminile | Giovane ed energica |
-| `voice_config_narratrice_elegante.json` | IT | Femminile | Matura ed elegante |
-| `voice_config_english.json` | EN | Maschile | Professionale inglese |
-| `voice_config_narrator_documentary_en.json` | EN | Maschile | BBC-style |
-
-Vedi [config/README.md](config/README.md) per lista completa e dettagli.
-
-### Voice Cloning (Voci Clonate)
-
-Se vuoi usare voci clonate da campioni audio reali, vedi [CLONAZIONE_VOCE.md](CLONAZIONE_VOCE.md).
+- Prova un'altra voce dal menu
+- Aumenta dettagli in `voice_description` (per le voci design)
+- Attiva Biochim per testi tecnici
 
 ---
 
