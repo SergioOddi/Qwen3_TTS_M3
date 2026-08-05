@@ -1,0 +1,11 @@
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "voice_name": "Ellida_arrabbiato",
+  "prompt_speech_path": "VOICE_SAMPLES/Ellida_arrabbiato.wav",
+  "ref_text": "Ma sì, lasciami andare via...Non sono nata per essere trattenuta come una cosa tua.",
+  "output_format": "wav",
+  "sample_rate": 24000,
+  "speed_factor": 1.0,
+  "tags": []
+}

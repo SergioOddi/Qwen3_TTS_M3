@@ -1,0 +1,11 @@
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "voice_name": "Lida_disgustato",
+  "prompt_speech_path": "VOICE_SAMPLES/Lida_disgustato.wav",
+  "ref_text": "La sua volontà non ha più alcun potere su di me. Lei è ora per me come un morto che le onde hanno ributtato a riva. E che il mare deve riprendersi. Non provo più per lei che orrore. E nemmeno alcuna attrazione.",
+  "output_format": "wav",
+  "sample_rate": 24000,
+  "speed_factor": 1.0,
+  "tags": []
+}

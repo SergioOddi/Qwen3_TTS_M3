@@ -64,7 +64,8 @@ const designVoicesByGender = (g) =>
 // ponytail: lista emozioni hardcoded (come la select "Variante emotiva" in index.html);
 // l'unica fonte canonica è SELECTABLE_EMOTIONS in voices.py.
 const EMOTIONS = ["felice", "triste", "arrabbiato", "impaurito",
-                  "sorpreso", "ironico", "calmo"];
+                  "sorpreso", "ironico", "calmo",
+                  "disgustato", "malinconico", "confuso"];
 async function loadVoices() {
   const r = await fetch("/api/voices");
   voicesCache = await r.json();
@@ -88,7 +89,7 @@ function renderVoiceCards() {
            ${(v.emotions || []).length ? `<span class="badge">😊 ${esc(v.emotions.join(", "))}</span>` : ""}</div>
       <div class="desc">${esc(v.description || "")}</div>
       ${v.type === "clone"
-        ? `<audio controls src="/api/voices/${encodeURIComponent(v.id)}/sample"></audio>` : ""}
+        ? `<audio controls preload="none" src="/api/voices/${encodeURIComponent(v.id)}/sample"></audio>` : ""}
       <div class="card-actions">
         <button class="v-edit">✎ Modifica</button>
         <a class="v-export" href="/api/voices/${encodeURIComponent(v.id)}/export"
@@ -117,6 +118,7 @@ async function toggleEditor(card, id) {
   if (!box.classList.contains("hidden")) { box.classList.add("hidden"); box.innerHTML = ""; return; }
   const cfg = await (await fetch(`/api/voices/${encodeURIComponent(id)}/config`)).json();
   box.innerHTML = `
+    <button class="v-e-close" title="Chiudi" type="button">✕</button>
     <label>Nome</label><input class="v-e-name" type="text" value="${esc(cfg.id)}">
     <label>Lingua</label>
     <select class="v-e-lang">${LANGS.map((l) =>
@@ -126,7 +128,10 @@ async function toggleEditor(card, id) {
     <label>Descrizione</label>
     <textarea class="v-e-desc" rows="2">${esc(cfg.description || "")}</textarea>
     ${cfg.type === "clone"
-      ? `<label>Trascrizione (ref_text)</label><textarea class="v-e-ref" rows="2">${esc(cfg.ref_text || "")}</textarea>` : ""}
+      ? `<label>Trascrizione (ref_text)</label><textarea class="v-e-ref" rows="2">${esc(cfg.ref_text || "")}</textarea>
+         <label>Sostituisci campione audio (wav/mp3)</label>
+         <input class="v-e-sample" type="file" accept="audio/*">
+         <div class="status v-e-sample-status"></div>` : ""}
     <label>Stile (instruct)</label><input class="v-e-instruct" type="text" value="${esc(cfg.instruct || "")}">
     <div class="row" style="margin-top:.5rem">
       <button class="v-e-save primary">Salva</button>
@@ -134,7 +139,22 @@ async function toggleEditor(card, id) {
     </div>
     <div class="status v-e-status"></div>`;
   box.classList.remove("hidden");
-  box.querySelector(".v-e-cancel").onclick = () => { box.classList.add("hidden"); box.innerHTML = ""; };
+  const close = () => { box.classList.add("hidden"); box.innerHTML = ""; };
+  box.querySelector(".v-e-close").onclick = close;
+  box.querySelector(".v-e-cancel").onclick = close;
+  const sampleInput = box.querySelector(".v-e-sample");
+  if (sampleInput) sampleInput.onchange = async () => {
+    const file = sampleInput.files[0];
+    if (!file) return;
+    const status = box.querySelector(".v-e-sample-status");
+    const fd = new FormData();
+    fd.append("audio", file, file.name);
+    setStatus(status, "Carico campione…", "");
+    const r = await fetch(`/api/voices/${encodeURIComponent(id)}/sample`, { method: "POST", body: fd });
+    if (!r.ok) { setStatus(status, "Errore: " + (await r.text()), "err"); return; }
+    setStatus(status, "Campione aggiornato.", "ok");
+    await loadVoices();
+  };
   box.querySelector(".v-e-save").onclick = async () => {
     const body = {
       new_id: box.querySelector(".v-e-name").value.trim(),
@@ -518,14 +538,16 @@ function renderPicker() {
              data-name="${esc(g.name)}">${esc(g.name)}</button>`).join("");
   names.classList.toggle("hidden", !picker.open);
   const g = groups.find((x) => x.name === picker.name);
-  $("#t-picker-emos").innerHTML = g ? targetLabel() + `<div class="pk-current">${esc(g.name)}</div>` +
+  $("#t-picker-emos").innerHTML = (picker.open && g) ? targetLabel() + `<div class="pk-current">${esc(g.name)}</div>` +
     g.chips.map((c) => `<button class="pk-chip" draggable="true"
        data-value="${esc(c.value)}" title="${esc(c.value)}">${esc(c.label)}</button>`).join("") : "";
   const tgt = $("#t-picker-emos .pk-target");
   if (tgt) tgt.onclick = () => selectedBlock()?.scrollIntoView({ block: "center", behavior: "smooth" });
-  $("#t-picker-body").classList.toggle("hidden", !picker.open && !g);
+  // "open" governa tutto il pannello: la testa lo apre/chiude sempre per intero
+  // (prima restava aperto per sempre dopo aver scelto un nome: bug segnalato).
+  $("#t-picker-body").classList.toggle("hidden", !picker.open);
   names.querySelectorAll(".pk-name").forEach((b) => b.onclick = () => {
-    picker.name = b.dataset.name; picker.open = false; renderPicker();
+    picker.name = b.dataset.name; renderPicker();
   });
   $$("#t-picker-emos .pk-chip").forEach((c) => {
     c.ondragstart = (e) => e.dataTransfer.setData("text/plain", c.dataset.value);

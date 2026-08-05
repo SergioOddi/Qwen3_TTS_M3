@@ -98,6 +98,13 @@ def create_app(model_manager=None, job_queue=None) -> FastAPI:
             raise HTTPException(404, "campione non trovato")
         return FileResponse(p)
 
+    @app.get("/api/voices/{voice_id}/emotion/{emotion}/sample")
+    def api_emotion_sample(voice_id: str, emotion: str):
+        p, _ = voices.get_emotion_sample(voice_id, emotion)
+        if p is None:
+            raise HTTPException(404, "campione non trovato")
+        return FileResponse(p)
+
     @app.post("/api/voices")
     def api_create_voice(
         name: str = Form(...), language: str = Form("Italian"),
@@ -165,6 +172,13 @@ def create_app(model_manager=None, job_queue=None) -> FastAPI:
         try:
             return voices.add_emotion_sample(
                 voice_id, emotion, audio.file.read(), ref_text)
+        except ValueError as e:
+            raise HTTPException(400, str(e))
+
+    @app.post("/api/voices/{voice_id}/sample")
+    def api_replace_sample(voice_id: str, audio: UploadFile = File(...)):
+        try:
+            return voices.replace_sample(voice_id, audio.file.read())
         except ValueError as e:
             raise HTTPException(400, str(e))
 

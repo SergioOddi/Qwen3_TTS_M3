@@ -1,0 +1,11 @@
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "voice_name": "Lida_confuso",
+  "prompt_speech_path": "VOICE_SAMPLES/Lida_confuso.wav",
+  "ref_text": "Non capisco. Doveva essere qui. L'ho lasciato esattamente sul tavolo. Sono sicura che c'era... ma ora non c'è e non ho idea di dove sia finito.",
+  "output_format": "wav",
+  "sample_rate": 24000,
+  "speed_factor": 1.0,
+  "tags": []
+}

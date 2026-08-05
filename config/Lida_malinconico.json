@@ -1,0 +1,11 @@
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "voice_name": "Lida_malinconico",
+  "prompt_speech_path": "VOICE_SAMPLES/Lida_malinconico.wav",
+  "ref_text": "Sì, domani... forse il mio destino, il mio vero destino sarà compiuto. Tutta una intera vita di libertà sarà perduta... perduta per me. E anche per lui, forse.",
+  "output_format": "wav",
+  "sample_rate": 24000,
+  "speed_factor": 1.0,
+  "tags": []
+}

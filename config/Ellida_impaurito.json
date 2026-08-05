@@ -1,0 +1,11 @@
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "voice_name": "Ellida_impaurito",
+  "prompt_speech_path": "VOICE_SAMPLES/Ellida_impaurito.wav",
+  "ref_text": "Non guardarmi così, sento che mi togli il respiro. Via! Vada via! Aiuto!",
+  "output_format": "wav",
+  "sample_rate": 24000,
+  "speed_factor": 1.0,
+  "tags": []
+}

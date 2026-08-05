@@ -1,0 +1,11 @@
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "voice_name": "Ellida_confuso",
+  "prompt_speech_path": "VOICE_SAMPLES/Ellida_confuso.wav",
+  "ref_text": "Era qui, lo so, eppure adesso il vuoto è l’unica cosa certa.",
+  "output_format": "wav",
+  "sample_rate": 24000,
+  "speed_factor": 1.0,
+  "tags": []
+}

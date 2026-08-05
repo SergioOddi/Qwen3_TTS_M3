@@ -2,6 +2,7 @@
 import numpy as np
 
 from app.pipeline import apply_emotion_dsp, EMOTION_DSP
+from app.voices import ALLOWED_EMOTIONS
 
 
 def test_dsp_changes_and_clips():
@@ -19,8 +20,7 @@ def test_dsp_changes_and_clips():
     # gain alto (arrabbiato 1.15) non deve superare il clip
     ang = apply_emotion_dsp(y, sr, "arrabbiato")
     assert ang.max() <= 1.0 and ang.min() >= -1.0
-    assert set(EMOTION_DSP) <= {"felice", "triste", "arrabbiato", "impaurito",
-                                "sorpreso", "ironico", "calmo"}
+    assert set(EMOTION_DSP) <= set(ALLOWED_EMOTIONS)
 
 
 if __name__ == "__main__":

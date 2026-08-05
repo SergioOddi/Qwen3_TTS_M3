@@ -77,9 +77,14 @@ progress:indeterminate::-webkit-progress-bar { background: transparent; }
 }
 .card-actions .v-export { color: var(--accent); }
 .card-actions .danger:hover { border-color: var(--err); color: var(--err); }
-.v-editor { border-top: 1px solid var(--border); margin-top: .6rem; padding-top: .4rem; }
+.v-editor { border-top: 1px solid var(--border); margin-top: .6rem; padding-top: .4rem; position: relative; }
 .v-editor label { margin-top: .5rem; }
 .v-editor .primary { margin-top: 0; }
+.v-e-close {
+  position: absolute; top: 0; right: 0; border: none; background: none; cursor: pointer;
+  font-size: .9rem; color: var(--muted); line-height: 1; padding: .2rem .3rem;
+}
+.v-e-close:hover { color: var(--err); }
 .form { background: var(--panel); padding: 1rem; border-radius: 10px; margin-top: .5rem; }
 ul#b-results { list-style: none; padding: 0; }
 ul#b-results li { padding: .4rem 0; border-bottom: 1px solid var(--border); }

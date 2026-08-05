@@ -1,0 +1,11 @@
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "voice_name": "Wangel_malinconico",
+  "prompt_speech_path": "VOICE_SAMPLES/Wangel_malinconico.wav",
+  "ref_text": "C’è una solitudine che non nasce dall’abbandono, ma dal vedere chi ami restare chiuso in se stesso.",
+  "output_format": "wav",
+  "sample_rate": 24000,
+  "speed_factor": 1.0,
+  "tags": []
+}

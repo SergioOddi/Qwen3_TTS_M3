@@ -1,0 +1,11 @@
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "voice_name": "Lida_ironico",
+  "prompt_speech_path": "VOICE_SAMPLES/Lida_ironico.wav",
+  "ref_text": "E chi sarebbe il grande uomo? Tu? Sei solo un miserabile insetto senza spina dorsale.",
+  "output_format": "wav",
+  "sample_rate": 24000,
+  "speed_factor": 1.0,
+  "tags": []
+}

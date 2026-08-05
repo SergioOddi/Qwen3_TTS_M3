@@ -1,0 +1,12 @@
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "voice_name": "Lida_felice",
+  "prompt_speech_path": "VOICE_SAMPLES/Lida_felice.wav",
+  "ref_text": "Oh, mio caro marito! Come sono contenta che tu sia già tornato! Hai finito di lavorare?",
+  "output_format": "wav",
+  "sample_rate": 24000,
+  "speed_factor": 1.0,
+  "tags": [],
+  "voice_notes": ""
+}

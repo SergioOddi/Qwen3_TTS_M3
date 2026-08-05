@@ -14,6 +14,9 @@ EMOTION_PHRASES = {
     "sorpreso": "tono sorpreso e incredulo",
     "ironico": "tono ironico e sarcastico",
     "calmo": "tono calmo e rilassato",
+    "disgustato": "tono disgustato e sprezzante",
+    "malinconico": "tono malinconico e nostalgico",
+    "confuso": "tono confuso ed esitante",
 }
 
 # Preset DSP (pitch in semitoni, tempo, gain) — fallback per voci clone senza
@@ -22,7 +25,8 @@ EMOTION_DSP = {
     "felice": (1.5, 1.05, 1.05), "triste": (-1.5, 0.95, 0.95),
     "arrabbiato": (0.5, 1.08, 1.15), "impaurito": (2.0, 1.10, 0.95),
     "sorpreso": (2.5, 1.05, 1.10), "ironico": (0.5, 0.98, 1.0),
-    "calmo": (-0.5, 0.95, 0.98),
+    "calmo": (-0.5, 0.95, 0.98), "disgustato": (-1.0, 0.97, 1.0),
+    "malinconico": (-1.5, 0.93, 0.95), "confuso": (0.5, 0.97, 0.98),
 }
 
 

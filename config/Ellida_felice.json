@@ -1,0 +1,11 @@
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "voice_name": "Ellida_felice",
+  "prompt_speech_path": "VOICE_SAMPLES/Ellida_felice.wav",
+  "ref_text": "Ti rivedo e già il giorno mi pare meno severo. Sono così felice con te che non posso immaginare la mia vita senza di te.",
+  "output_format": "wav",
+  "sample_rate": 24000,
+  "speed_factor": 1.0,
+  "tags": []
+}

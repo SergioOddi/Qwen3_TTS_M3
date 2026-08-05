@@ -1,0 +1,12 @@
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "voice_name": "Lyngstrand_furioso",
+  "prompt_speech_path": "VOICE_SAMPLES/Luca_furioso.wav",
+  "ref_text": "Basta! Ho detto basta! Non osare fare un altro passo e stammi bene a sentire! Ti ho dato tutto, ogni singola cosa, e tu hai distrutto tutto quello che avevamo! Guardami in faccia quando ti parlo! Sei un vigliacco, un maledetto vigliacco! FUORI DI QUI!",
+  "output_format": "wav",
+  "sample_rate": 24000,
+  "speed_factor": 1.0,
+  "tags": [],
+  "instruct": "furia"
+}

@@ -14,6 +14,7 @@ _TAG_SUFFIXES = ("docente", "narratore")
 ALLOWED_EMOTIONS = (
     "neutro", "felice", "triste", "arrabbiato",
     "impaurito", "sorpreso", "ironico", "calmo",
+    "disgustato", "malinconico", "confuso",
 )
 # Emozioni selezionabili (escluso "neutro" = voce base senza istruzione).
 # Le voci design le supportano tutte via instruct (EMOTION_PHRASES in pipeline);
@@ -49,6 +50,8 @@ def _voice_info(path: Path) -> dict | None:
         # clone: solo emozioni con campione; design: tutte (emozione nativa via instruct)
         "emotions": sorted(data.get("emotion_samples", {})) if is_clone
         else list(SELECTABLE_EMOTIONS),
+        # trascrizione di ogni campione emotivo, per QC audio<->testo lato UI
+        "emotion_texts": data.get("emotion_ref_texts", {}) if is_clone else {},
     }
 
 
@@ -134,6 +137,24 @@ def add_emotion_sample(voice_id, emotion, audio_bytes, ref_text):
         json.dumps(cfg, ensure_ascii=False, indent=2), encoding="utf-8")
     return {"voice_id": voice_id, "emotion": emotion,
             "emotions": sorted(cfg["emotion_samples"])}
+
+
+def replace_sample(voice_id: str, audio_bytes: bytes) -> dict:
+    """Sostituisce il campione audio base di una voce clonata esistente."""
+    info = get_voice(voice_id)
+    if info is None or info["type"] != "clone":
+        raise ValueError("voce clonata non trovata")
+    cfg = load_config(voice_id)
+    sample_path = _resolve(cfg["prompt_speech_path"]) if cfg.get("prompt_speech_path") \
+        else appconfig.SAMPLES_DIR / f"{voice_id}.wav"
+    _to_wav_24k_mono(audio_bytes, sample_path)
+    try:
+        cfg["prompt_speech_path"] = str(sample_path.relative_to(appconfig.PROJECT_ROOT))
+    except ValueError:
+        cfg["prompt_speech_path"] = str(sample_path)
+    (appconfig.CONFIG_DIR / f"{voice_id}.json").write_text(
+        json.dumps(cfg, ensure_ascii=False, indent=2), encoding="utf-8")
+    return get_voice(voice_id)
 
 
 def slugify(name: str, maxlen: int | None = None, default: str = "voce") -> str:

@@ -1,0 +1,12 @@
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "voice_name": "Lyngstrand_imbarazzato",
+  "prompt_speech_path": "VOICE_SAMPLES/Luca_imbarazzato.wav",
+  "ref_text": "Ah... oh, cielo. Io... scusami, non volevo... cioè, non pensavo fossi dentro. Io... stavo solo cercando il... beh, non importa. Scusa ancora, davvero! S-sono un disastro... sparisco subito, fa finta che non sia mai entrato, ti prego!",
+  "output_format": "wav",
+  "sample_rate": 24000,
+  "speed_factor": 1.0,
+  "tags": [],
+  "instruct": "imbarazzo"
+}

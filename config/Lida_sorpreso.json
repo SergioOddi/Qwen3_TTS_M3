@@ -1,0 +1,11 @@
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "voice_name": "Lida_sorpreso",
+  "prompt_speech_path": "VOICE_SAMPLES/Lida_sorpreso.wav",
+  "ref_text": "Ma davvero?... Cosi vicina, così cara ti sono? non riesco a crederlo.",
+  "output_format": "wav",
+  "sample_rate": 24000,
+  "speed_factor": 1.0,
+  "tags": []
+}

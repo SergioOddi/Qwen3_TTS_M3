@@ -1,0 +1,11 @@
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "voice_name": "Wangel_disgustato",
+  "prompt_speech_path": "VOICE_SAMPLES/Wangel_disgustato.wav",
+  "ref_text": "Ma, Ellida, per amor del cielo! Come hai potuto legarti a un individuo simile! Con uno straniero, con uno che non conoscevi!",
+  "output_format": "wav",
+  "sample_rate": 24000,
+  "speed_factor": 1.0,
+  "tags": []
+}

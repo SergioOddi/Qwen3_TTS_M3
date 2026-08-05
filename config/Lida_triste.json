@@ -1,0 +1,11 @@
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "voice_name": "Lida_triste",
+  "prompt_speech_path": "VOICE_SAMPLES/Lida_triste.wav",
+  "ref_text": "Sì, dal profondo del mio cuore... del mio cuore colmo di tristezza. Ormai non ti amo più, tu non mi ami più ed è arrivata l'ora di lasciarci.",
+  "output_format": "wav",
+  "sample_rate": 24000,
+  "speed_factor": 1.0,
+  "tags": []
+}

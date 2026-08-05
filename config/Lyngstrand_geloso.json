@@ -1,0 +1,12 @@
+{
+  "mode": "voice_clone",
+  "language": "Italian",
+  "voice_name": "Lyngstrand_geloso",
+  "prompt_speech_path": "VOICE_SAMPLES/Luca_geloso.wav",
+  "ref_text": "E così eri con lui... Di cosa parlavate di così divertente? No, perché vi ho visti. Vi ho visti da lontano. Ti faceva ridere... ti toccava il braccio, e tu non ti sei spostata. Chi è, sentiamo? Perché mi guardi così adesso? Non sono pazzo! Dimmi la verità... ti piace? Guardami negli occhi e dimmelo",
+  "output_format": "wav",
+  "sample_rate": 24000,
+  "speed_factor": 1.0,
+  "tags": [],
+  "instruct": "gelosia"
+}
