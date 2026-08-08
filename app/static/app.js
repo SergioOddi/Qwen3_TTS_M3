@@ -283,7 +283,7 @@ function makeTeatro({ prefix, fillVoiceUI, readVoice }) {
     const el = tpl.content.firstElementChild.cloneNode(true);
     fillVoiceUI(el, data);
     if (data.character != null) cls(el, "char").value = data.character;
-    if (data.speed != null) cls(el, "speed").value = String(data.speed);
+    if (data.speed != null) cls(el, "speed").value = Number(data.speed).toFixed(1);
     if (data.instruct != null && cls(el, "instruct")) cls(el, "instruct").value = data.instruct;
     if (data.pause_after != null) cls(el, "pause").value = data.pause_after;
     if (data.text != null) cls(el, "text").value = data.text;
